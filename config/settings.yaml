@@ -1,0 +1,220 @@
+# Nimbus Default Configuration
+# This file contains the default settings for Nimbus backup solution
+
+backup:
+  # Default destination for backups (null = prompt user)
+  default_destination: null
+
+  # Enable compression
+  compression: true
+  compression_level: 6  # 1-9, higher = better compression but slower
+
+  # Enable encryption (requires password)
+  encryption: false
+
+  # Use incremental backup by default
+  incremental: true
+
+  # File patterns to exclude from backup
+  exclude_patterns:
+    - "*.tmp"
+    - "*.temp"
+    - "*.log"
+    - "*.cache"
+    - "__pycache__"
+    - "node_modules"
+    - ".git"
+    - ".venv"
+    - "venv"
+    - ".DS_Store"
+    - "Thumbs.db"
+    - "desktop.ini"
+
+  # Maximum file size to backup (null = no limit)
+  max_file_size: "5GB"
+
+  # Verify backup integrity using checksums
+  verify_backup: true
+
+  # Resume failed backups
+  resume_on_failure: true
+
+schedule:
+  # Enable scheduled backups
+  enabled: false
+
+  # Default backup time (24-hour format)
+  time: "23:00"
+
+  # Frequency: daily, weekly, monthly
+  frequency: "daily"
+
+  # Days of week for weekly backups (monday-sunday)
+  days:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+    - saturday
+    - sunday
+
+notifications:
+  # Email notifications
+  email: false
+  email_address: null
+  smtp_server: null
+  smtp_port: 587
+  smtp_username: null
+  smtp_password: null
+  smtp_use_tls: true
+
+  # Telegram notifications
+  telegram: false
+  telegram_token: null
+  telegram_chat_id: null
+
+  # Desktop notifications
+  desktop: true
+
+  # Notification events
+  on_success: true
+  on_failure: true
+  on_warning: true
+
+performance:
+  # Number of threads for parallel backup
+  threads: 4
+
+  # Chunk size for file transfers
+  chunk_size: "10MB"
+
+  # Bandwidth limit (null = unlimited)
+  bandwidth_limit: null
+
+  # Retry attempts for failed operations
+  retry_attempts: 3
+
+  # Delay between retries (seconds)
+  retry_delay: 5
+
+  # Operation timeout (seconds)
+  timeout: 300
+
+  # Use memory-mapped files for large files
+  use_mmap: true
+
+  # Buffer size for file operations
+  buffer_size: "64KB"
+
+security:
+  # Encryption algorithm
+  encryption_algorithm: "AES256"
+
+  # Hash algorithm for checksums
+  hash_algorithm: "SHA256"
+
+  # Key derivation function
+  key_derivation: "PBKDF2"
+
+  # Key derivation iterations
+  key_iterations: 100000
+
+  # Store encryption keys securely
+  keyring_enabled: true
+
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # Log file path
+  file: "~/.config/nimbus/logs/nimbus.log"
+
+  # Maximum log file size
+  max_size: "100MB"
+
+  # Number of backup log files to keep
+  backup_count: 10
+
+  # Log rotation: time or size
+  rotation: "size"
+
+  # Log format
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+
+  # Log to console
+  console: true
+
+  # Colorize console output
+  colorize: true
+
+ui:
+  # Theme: dark, light, auto
+  theme: "dark"
+
+  # Language: en, tr, etc.
+  language: "en"
+
+  # Show hidden files in file browser
+  show_hidden_files: false
+
+  # Confirm before starting backup
+  confirm_before_backup: true
+
+  # Minimize to system tray
+  minimize_to_tray: true
+
+  # Start minimized
+  start_minimized: false
+
+  # Show notifications in system tray
+  tray_notifications: true
+
+updates:
+  # Check for updates on startup
+  check_on_startup: true
+
+  # Automatically install updates
+  auto_update: false
+
+  # Update channel: stable, beta, dev
+  update_channel: "stable"
+
+  # Update check interval (hours)
+  check_interval: 24
+
+cloud:
+  # Default cloud provider (null = local backup only)
+  default_provider: null
+
+  # Upload to cloud after local backup
+  auto_upload: false
+
+  # Keep local backup after upload
+  keep_local_copy: true
+
+  # Sync settings
+  sync_enabled: false
+  sync_interval: 3600  # seconds
+
+advanced:
+  # Enable debug mode
+  debug: false
+
+  # Enable profiling
+  profiling: false
+
+  # Enable experimental features
+  experimental: false
+
+  # Maximum memory usage (null = unlimited)
+  max_memory: null
+
+  # Temporary directory
+  temp_dir: "/tmp/nimbus"
+
+  # Cache directory
+  cache_dir: "~/.cache/nimbus"
+
+  # Cache size limit
+  cache_size_limit: "1GB"
