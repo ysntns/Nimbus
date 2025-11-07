@@ -2,15 +2,17 @@
 Integration tests for encryption module.
 """
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 
 
 def test_encryption_import():
     """Test encryption module can be imported."""
     try:
         from app.crypto.encryption import EncryptionManager, KeyManager
+
         assert EncryptionManager is not None
         assert KeyManager is not None
     except ImportError:

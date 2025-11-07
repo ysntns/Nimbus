@@ -5,29 +5,35 @@ Supports email, Telegram, and desktop notifications for backup events.
 """
 
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Dict, Optional, Any
 from dataclasses import dataclass
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from enum import Enum
+from typing import Any, Dict, Optional
+
 from loguru import logger
 
 try:
     import requests
+
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
 
 try:
     from plyer import notification as desktop_notification
+
     DESKTOP_NOTIFICATION_AVAILABLE = True
 except ImportError:
     DESKTOP_NOTIFICATION_AVAILABLE = False
-    logger.warning("Desktop notifications not available - install with: pip install plyer")
+    logger.warning(
+        "Desktop notifications not available - install with: pip install plyer"
+    )
 
 
 class NotificationType(Enum):
     """Notification event types."""
+
     SUCCESS = "success"
     FAILURE = "failure"
     WARNING = "warning"
@@ -79,7 +85,7 @@ class NotificationManager:
         notification_type: NotificationType,
         title: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """Send notification through enabled channels.
 
@@ -129,7 +135,7 @@ class NotificationManager:
         notification_type: NotificationType,
         title: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """Send email notification.
 
@@ -139,16 +145,24 @@ class NotificationManager:
             message: Email body
             details: Optional additional details
         """
-        if not all([self.config.smtp_server, self.config.smtp_username, self.config.email_address]):
-            logger.warning("Email configuration incomplete - skipping email notification")
+        if not all(
+            [
+                self.config.smtp_server,
+                self.config.smtp_username,
+                self.config.email_address,
+            ]
+        ):
+            logger.warning(
+                "Email configuration incomplete - skipping email notification"
+            )
             return
 
         try:
             # Create message
             msg = MIMEMultipart()
-            msg['From'] = self.config.smtp_username
-            msg['To'] = self.config.email_address
-            msg['Subject'] = f"[Nimbus] {title}"
+            msg["From"] = self.config.smtp_username
+            msg["To"] = self.config.email_address
+            msg["Subject"] = f"[Nimbus] {title}"
 
             # Build email body
             body = f"{message}\n\n"
@@ -160,7 +174,7 @@ class NotificationManager:
 
             body += f"\n---\nNimbus Backup System\n{notification_type.value.upper()} notification"
 
-            msg.attach(MIMEText(body, 'plain'))
+            msg.attach(MIMEText(body, "plain"))
 
             # Send email
             server = smtplib.SMTP(self.config.smtp_server, self.config.smtp_port)
@@ -184,7 +198,7 @@ class NotificationManager:
         notification_type: NotificationType,
         title: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         """Send Telegram notification.
 
@@ -195,11 +209,15 @@ class NotificationManager:
             details: Optional additional details
         """
         if not REQUESTS_AVAILABLE:
-            logger.warning("Requests library not available - skipping Telegram notification")
+            logger.warning(
+                "Requests library not available - skipping Telegram notification"
+            )
             return
 
         if not all([self.config.telegram_token, self.config.telegram_chat_id]):
-            logger.warning("Telegram configuration incomplete - skipping Telegram notification")
+            logger.warning(
+                "Telegram configuration incomplete - skipping Telegram notification"
+            )
             return
 
         try:
@@ -213,11 +231,13 @@ class NotificationManager:
                     text += f"  • {key}: `{value}`\n"
 
             # Send via Telegram Bot API
-            url = f"https://api.telegram.org/bot{self.config.telegram_token}/sendMessage"
+            url = (
+                f"https://api.telegram.org/bot{self.config.telegram_token}/sendMessage"
+            )
             payload = {
-                'chat_id': self.config.telegram_chat_id,
-                'text': text,
-                'parse_mode': 'Markdown'
+                "chat_id": self.config.telegram_chat_id,
+                "text": text,
+                "parse_mode": "Markdown",
             }
 
             response = requests.post(url, json=payload, timeout=10)
@@ -231,10 +251,7 @@ class NotificationManager:
             logger.error(f"Failed to send Telegram notification: {e}")
 
     def _send_desktop(
-        self,
-        notification_type: NotificationType,
-        title: str,
-        message: str
+        self, notification_type: NotificationType, title: str, message: str
     ):
         """Send desktop notification.
 
@@ -252,7 +269,7 @@ class NotificationManager:
                 title=f"Nimbus - {title}",
                 message=message,
                 app_name="Nimbus",
-                timeout=10
+                timeout=10,
             )
 
             logger.debug("Desktop notification sent")
@@ -273,7 +290,7 @@ class NotificationManager:
             NotificationType.SUCCESS: "✅",
             NotificationType.FAILURE: "❌",
             NotificationType.WARNING: "⚠️",
-            NotificationType.INFO: "ℹ️"
+            NotificationType.INFO: "ℹ️",
         }
         return emojis.get(notification_type, "📢")
 
@@ -287,7 +304,7 @@ class NotificationManager:
             NotificationType.SUCCESS,
             "Backup Completed Successfully",
             f"Backup completed with {stats.get('backed_up_files', 0)} files backed up.",
-            stats
+            stats,
         )
 
     def send_backup_failure(self, error: str, details: Optional[Dict[str, Any]] = None):
@@ -301,10 +318,12 @@ class NotificationManager:
             NotificationType.FAILURE,
             "Backup Failed",
             f"Backup failed with error: {error}",
-            details
+            details,
         )
 
-    def send_backup_warning(self, warning: str, details: Optional[Dict[str, Any]] = None):
+    def send_backup_warning(
+        self, warning: str, details: Optional[Dict[str, Any]] = None
+    ):
         """Send backup warning notification.
 
         Args:
@@ -312,8 +331,5 @@ class NotificationManager:
             details: Optional warning details
         """
         self.send_notification(
-            NotificationType.WARNING,
-            "Backup Warning",
-            warning,
-            details
+            NotificationType.WARNING, "Backup Warning", warning, details
         )

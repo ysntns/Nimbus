@@ -9,8 +9,8 @@ from app.core.backup import BackupEngine, IncrementalBackup
 from app.core.config import ConfigManager, config
 
 __all__ = [
-    'BackupEngine',
-    'IncrementalBackup',
-    'ConfigManager',
-    'config',
+    "BackupEngine",
+    "IncrementalBackup",
+    "ConfigManager",
+    "config",
 ]

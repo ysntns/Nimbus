@@ -5,10 +5,11 @@ Defines the interface that all cloud providers must implement.
 """
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 from loguru import logger
 
 
@@ -50,7 +51,9 @@ class DownloadResult:
 class CloudProvider(ABC):
     """Abstract base class for cloud storage providers."""
 
-    def __init__(self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+    ):
         """Initialize cloud provider.
 
         Args:
@@ -76,7 +79,7 @@ class CloudProvider(ABC):
         self,
         local_path: Path,
         remote_path: str,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> UploadResult:
         """Upload a file to cloud storage.
 
@@ -95,7 +98,7 @@ class CloudProvider(ABC):
         self,
         remote_path: str,
         local_path: Path,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> DownloadResult:
         """Download a file from cloud storage.
 
@@ -207,7 +210,7 @@ class CloudProviderFactory:
         cls,
         provider_name: str,
         credentials: Dict[str, Any],
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ) -> CloudProvider:
         """Create a cloud provider instance.
 

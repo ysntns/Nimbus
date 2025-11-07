@@ -4,39 +4,46 @@ Google Drive Provider - Cloud storage integration for Google Drive
 Implements backup to Google Drive using Google Drive API v3.
 """
 
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 from loguru import logger
 
 from app.cloud.base import (
-    CloudProvider,
     CloudFile,
-    UploadResult,
+    CloudProvider,
+    CloudProviderFactory,
     DownloadResult,
-    CloudProviderFactory
+    UploadResult,
 )
 
 try:
+    import io
+
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+    from google_auth_oauthlib.flow import InstalledAppFlow
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
-    from google.oauth2.credentials import Credentials
-    from google.auth.transport.requests import Request
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    import io
+
     GOOGLE_DRIVE_AVAILABLE = True
 except ImportError:
     GOOGLE_DRIVE_AVAILABLE = False
-    logger.warning("Google Drive API not available - install with: pip install google-api-python-client google-auth-oauthlib")
+    logger.warning(
+        "Google Drive API not available - install with: pip install google-api-python-client google-auth-oauthlib"
+    )
 
 
 class GoogleDriveProvider(CloudProvider):
     """Google Drive cloud storage provider."""
 
     # OAuth 2.0 scopes
-    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
-    def __init__(self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+    ):
         """Initialize Google Drive provider.
 
         Args:
@@ -48,7 +55,7 @@ class GoogleDriveProvider(CloudProvider):
 
         super().__init__(credentials, config)
         self.service = None
-        self.folder_id = config.get('folder_id') if config else None
+        self.folder_id = config.get("folder_id") if config else None
 
     def authenticate(self) -> bool:
         """Authenticate with Google Drive.
@@ -60,7 +67,7 @@ class GoogleDriveProvider(CloudProvider):
             creds = None
 
             # Load credentials from token file if exists
-            token_file = self.credentials.get('token_file')
+            token_file = self.credentials.get("token_file")
             if token_file and Path(token_file).exists():
                 creds = Credentials.from_authorized_user_file(token_file, self.SCOPES)
 
@@ -70,18 +77,17 @@ class GoogleDriveProvider(CloudProvider):
                     creds.refresh(Request())
                 else:
                     flow = InstalledAppFlow.from_client_secrets_file(
-                        self.credentials['credentials_file'],
-                        self.SCOPES
+                        self.credentials["credentials_file"], self.SCOPES
                     )
                     creds = flow.run_local_server(port=0)
 
                 # Save credentials for next time
                 if token_file:
-                    with open(token_file, 'w') as token:
+                    with open(token_file, "w") as token:
                         token.write(creds.to_json())
 
             # Build service
-            self.service = build('drive', 'v3', credentials=creds)
+            self.service = build("drive", "v3", credentials=creds)
             self.authenticated = True
 
             logger.info("Successfully authenticated with Google Drive")
@@ -95,7 +101,7 @@ class GoogleDriveProvider(CloudProvider):
         self,
         local_path: Path,
         remote_path: str,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> UploadResult:
         """Upload a file to Google Drive.
 
@@ -113,33 +119,33 @@ class GoogleDriveProvider(CloudProvider):
         try:
             # File metadata
             file_metadata = {
-                'name': local_path.name,
-                'parents': [self.folder_id] if self.folder_id else []
+                "name": local_path.name,
+                "parents": [self.folder_id] if self.folder_id else [],
             }
 
             # Create media upload
             media = MediaFileUpload(
-                str(local_path),
-                resumable=True,
-                chunksize=1024 * 1024  # 1MB chunks
+                str(local_path), resumable=True, chunksize=1024 * 1024  # 1MB chunks
             )
 
             # Upload file
-            file = self.service.files().create(
-                body=file_metadata,
-                media_body=media,
-                fields='id,name,size'
-            ).execute()
+            file = (
+                self.service.files()
+                .create(body=file_metadata, media_body=media, fields="id,name,size")
+                .execute()
+            )
 
             file_size = local_path.stat().st_size
 
-            logger.info(f"Uploaded {local_path.name} to Google Drive (ID: {file.get('id')})")
+            logger.info(
+                f"Uploaded {local_path.name} to Google Drive (ID: {file.get('id')})"
+            )
 
             return UploadResult(
                 success=True,
-                file_id=file.get('id'),
+                file_id=file.get("id"),
                 file_path=remote_path,
-                size=file_size
+                size=file_size,
             )
 
         except Exception as e:
@@ -150,7 +156,7 @@ class GoogleDriveProvider(CloudProvider):
         self,
         remote_path: str,
         local_path: Path,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> DownloadResult:
         """Download a file from Google Drive.
 
@@ -173,23 +179,19 @@ class GoogleDriveProvider(CloudProvider):
             request = self.service.files().get_media(fileId=remote_path)
             local_path.parent.mkdir(parents=True, exist_ok=True)
 
-            with open(local_path, 'wb') as fh:
+            with open(local_path, "wb") as fh:
                 downloader = MediaIoBaseDownload(fh, request)
                 done = False
                 while not done:
                     status, done = downloader.next_chunk()
                     if progress_callback and status:
-                        progress_callback({'progress': status.progress() * 100})
+                        progress_callback({"progress": status.progress() * 100})
 
             file_size = local_path.stat().st_size
 
             logger.info(f"Downloaded {file_metadata['name']} from Google Drive")
 
-            return DownloadResult(
-                success=True,
-                local_path=local_path,
-                size=file_size
-            )
+            return DownloadResult(success=True, local_path=local_path, size=file_size)
 
         except Exception as e:
             logger.error(f"Download from Google Drive failed: {e}")
@@ -208,27 +210,37 @@ class GoogleDriveProvider(CloudProvider):
             return []
 
         try:
-            query = f"'{self.folder_id}' in parents" if self.folder_id else "trashed=false"
+            query = (
+                f"'{self.folder_id}' in parents" if self.folder_id else "trashed=false"
+            )
 
-            results = self.service.files().list(
-                q=query,
-                pageSize=1000,
-                fields="files(id, name, size, modifiedTime, mimeType, md5Checksum)"
-            ).execute()
+            results = (
+                self.service.files()
+                .list(
+                    q=query,
+                    pageSize=1000,
+                    fields="files(id, name, size, modifiedTime, mimeType, md5Checksum)",
+                )
+                .execute()
+            )
 
-            files = results.get('files', [])
+            files = results.get("files", [])
 
             cloud_files = []
             for file in files:
-                cloud_files.append(CloudFile(
-                    id=file['id'],
-                    name=file['name'],
-                    path=file['id'],
-                    size=int(file.get('size', 0)),
-                    modified=datetime.fromisoformat(file['modifiedTime'].replace('Z', '+00:00')),
-                    checksum=file.get('md5Checksum'),
-                    mime_type=file.get('mimeType')
-                ))
+                cloud_files.append(
+                    CloudFile(
+                        id=file["id"],
+                        name=file["name"],
+                        path=file["id"],
+                        size=int(file.get("size", 0)),
+                        modified=datetime.fromisoformat(
+                            file["modifiedTime"].replace("Z", "+00:00")
+                        ),
+                        checksum=file.get("md5Checksum"),
+                        mime_type=file.get("mimeType"),
+                    )
+                )
 
             logger.debug(f"Listed {len(cloud_files)} files from Google Drive")
             return cloud_files
@@ -272,15 +284,14 @@ class GoogleDriveProvider(CloudProvider):
 
         try:
             file_metadata = {
-                'name': remote_path,
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [self.folder_id] if self.folder_id else []
+                "name": remote_path,
+                "mimeType": "application/vnd.google-apps.folder",
+                "parents": [self.folder_id] if self.folder_id else [],
             }
 
-            folder = self.service.files().create(
-                body=file_metadata,
-                fields='id'
-            ).execute()
+            folder = (
+                self.service.files().create(body=file_metadata, fields="id").execute()
+            )
 
             logger.info(f"Created folder in Google Drive (ID: {folder.get('id')})")
             return True
@@ -302,19 +313,25 @@ class GoogleDriveProvider(CloudProvider):
             return None
 
         try:
-            file = self.service.files().get(
-                fileId=remote_path,
-                fields='id, name, size, modifiedTime, mimeType, md5Checksum'
-            ).execute()
+            file = (
+                self.service.files()
+                .get(
+                    fileId=remote_path,
+                    fields="id, name, size, modifiedTime, mimeType, md5Checksum",
+                )
+                .execute()
+            )
 
             return CloudFile(
-                id=file['id'],
-                name=file['name'],
-                path=file['id'],
-                size=int(file.get('size', 0)),
-                modified=datetime.fromisoformat(file['modifiedTime'].replace('Z', '+00:00')),
-                checksum=file.get('md5Checksum'),
-                mime_type=file.get('mimeType')
+                id=file["id"],
+                name=file["name"],
+                path=file["id"],
+                size=int(file.get("size", 0)),
+                modified=datetime.fromisoformat(
+                    file["modifiedTime"].replace("Z", "+00:00")
+                ),
+                checksum=file.get("md5Checksum"),
+                mime_type=file.get("mimeType"),
             )
 
         except Exception as e:
@@ -328,28 +345,24 @@ class GoogleDriveProvider(CloudProvider):
             Dictionary with 'total', 'used', and 'available' in bytes
         """
         if not self.authenticated:
-            return {'total': 0, 'used': 0, 'available': 0}
+            return {"total": 0, "used": 0, "available": 0}
 
         try:
-            about = self.service.about().get(fields='storageQuota').execute()
-            quota = about['storageQuota']
+            about = self.service.about().get(fields="storageQuota").execute()
+            quota = about["storageQuota"]
 
-            total = int(quota.get('limit', 0))
-            used = int(quota.get('usage', 0))
+            total = int(quota.get("limit", 0))
+            used = int(quota.get("usage", 0))
             available = total - used
 
-            return {
-                'total': total,
-                'used': used,
-                'available': available
-            }
+            return {"total": total, "used": used, "available": available}
 
         except Exception as e:
             logger.error(f"Failed to get quota info from Google Drive: {e}")
-            return {'total': 0, 'used': 0, 'available': 0}
+            return {"total": 0, "used": 0, "available": 0}
 
 
 # Register provider
 if GOOGLE_DRIVE_AVAILABLE:
-    CloudProviderFactory.register_provider('google_drive', GoogleDriveProvider)
-    CloudProviderFactory.register_provider('gdrive', GoogleDriveProvider)
+    CloudProviderFactory.register_provider("google_drive", GoogleDriveProvider)
+    CloudProviderFactory.register_provider("gdrive", GoogleDriveProvider)

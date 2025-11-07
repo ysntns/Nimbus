@@ -6,9 +6,9 @@ Provides various helper functions for file operations, formatting, etc.
 
 import os
 import re
-from pathlib import Path
-from typing import Union, Optional
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional, Union
 
 
 def format_size(size_bytes: int) -> str:
@@ -20,7 +20,7 @@ def format_size(size_bytes: int) -> str:
     Returns:
         Formatted size string (e.g., "1.5 GB")
     """
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
@@ -39,20 +39,20 @@ def parse_size(size_str: str) -> int:
     size_str = size_str.strip().upper()
 
     # Extract number and unit
-    match = re.match(r'^([\d.]+)\s*([KMGT]?B?)$', size_str)
+    match = re.match(r"^([\d.]+)\s*([KMGT]?B?)$", size_str)
 
     if not match:
         raise ValueError(f"Invalid size format: {size_str}")
 
     value = float(match.group(1))
-    unit = match.group(2) or 'B'
+    unit = match.group(2) or "B"
 
     multipliers = {
-        'B': 1,
-        'KB': 1024,
-        'MB': 1024 ** 2,
-        'GB': 1024 ** 3,
-        'TB': 1024 ** 4,
+        "B": 1,
+        "KB": 1024,
+        "MB": 1024**2,
+        "GB": 1024**3,
+        "TB": 1024**4,
     }
 
     return int(value * multipliers.get(unit, 1))
@@ -82,7 +82,7 @@ def format_duration(seconds: float) -> str:
     return f"{hours}h {minutes}m {seconds}s"
 
 
-def format_datetime(dt: datetime, format: str = '%Y-%m-%d %H:%M:%S') -> str:
+def format_datetime(dt: datetime, format: str = "%Y-%m-%d %H:%M:%S") -> str:
     """Format datetime to string.
 
     Args:
@@ -135,15 +135,15 @@ def safe_filename(filename: str) -> str:
         Safe filename
     """
     # Remove invalid characters
-    safe = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    safe = re.sub(r'[<>:"/\\|?*]', "_", filename)
 
     # Remove control characters
-    safe = ''.join(char for char in safe if ord(char) >= 32)
+    safe = "".join(char for char in safe if ord(char) >= 32)
 
     # Limit length
     if len(safe) > 255:
         name, ext = os.path.splitext(safe)
-        safe = name[:255 - len(ext)] + ext
+        safe = name[: 255 - len(ext)] + ext
 
     return safe
 
@@ -199,7 +199,7 @@ def get_file_count(directory: Union[str, Path], recursive: bool = True) -> int:
     count = 0
 
     if recursive:
-        for item in directory.rglob('*'):
+        for item in directory.rglob("*"):
             if item.is_file():
                 count += 1
     else:
@@ -222,7 +222,7 @@ def get_directory_size(directory: Union[str, Path]) -> int:
     directory = Path(directory)
     total_size = 0
 
-    for item in directory.rglob('*'):
+    for item in directory.rglob("*"):
         if item.is_file():
             total_size += item.stat().st_size
 
@@ -243,7 +243,7 @@ def generate_backup_name(source: str, timestamp: Optional[datetime] = None) -> s
         timestamp = datetime.now()
 
     source_name = Path(source).name
-    timestamp_str = timestamp.strftime('%Y%m%d_%H%M%S')
+    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
 
     return f"{source_name}_{timestamp_str}"
 
@@ -257,11 +257,11 @@ def validate_email(email: str) -> bool:
     Returns:
         True if valid
     """
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
-def truncate_string(text: str, max_length: int = 100, suffix: str = '...') -> str:
+def truncate_string(text: str, max_length: int = 100, suffix: str = "...") -> str:
     """Truncate string to maximum length.
 
     Args:
@@ -275,10 +275,10 @@ def truncate_string(text: str, max_length: int = 100, suffix: str = '...') -> st
     if len(text) <= max_length:
         return text
 
-    return text[:max_length - len(suffix)] + suffix
+    return text[: max_length - len(suffix)] + suffix
 
 
-def calculate_checksum_quick(file_path: Path, algorithm: str = 'md5') -> str:
+def calculate_checksum_quick(file_path: Path, algorithm: str = "md5") -> str:
     """Calculate quick checksum of file (first and last chunks).
 
     Args:
@@ -295,7 +295,7 @@ def calculate_checksum_quick(file_path: Path, algorithm: str = 'md5') -> str:
 
     chunk_size = 8192
 
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         # Read first chunk
         hash_obj.update(f.read(chunk_size))
 

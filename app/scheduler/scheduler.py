@@ -4,18 +4,20 @@ Scheduler Module - Automated backup scheduling using APScheduler
 Provides scheduled backup functionality with cron-like scheduling.
 """
 
-from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any
-from datetime import datetime, time
-from dataclasses import dataclass, asdict
 import json
+from dataclasses import asdict, dataclass
+from datetime import datetime, time
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 from loguru import logger
 
 try:
+    from apscheduler.job import Job
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
     from apscheduler.triggers.interval import IntervalTrigger
-    from apscheduler.job import Job
+
     APSCHEDULER_AVAILABLE = True
 except ImportError:
     APSCHEDULER_AVAILABLE = False
@@ -45,22 +47,22 @@ class BackupSchedule:
         """Convert to dictionary."""
         data = asdict(self)
         if self.created_at:
-            data['created_at'] = self.created_at.isoformat()
+            data["created_at"] = self.created_at.isoformat()
         if self.last_run:
-            data['last_run'] = self.last_run.isoformat()
+            data["last_run"] = self.last_run.isoformat()
         if self.next_run:
-            data['next_run'] = self.next_run.isoformat()
+            data["next_run"] = self.next_run.isoformat()
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'BackupSchedule':
+    def from_dict(cls, data: Dict[str, Any]) -> "BackupSchedule":
         """Create from dictionary."""
-        if 'created_at' in data and data['created_at']:
-            data['created_at'] = datetime.fromisoformat(data['created_at'])
-        if 'last_run' in data and data['last_run']:
-            data['last_run'] = datetime.fromisoformat(data['last_run'])
-        if 'next_run' in data and data['next_run']:
-            data['next_run'] = datetime.fromisoformat(data['next_run'])
+        if "created_at" in data and data["created_at"]:
+            data["created_at"] = datetime.fromisoformat(data["created_at"])
+        if "last_run" in data and data["last_run"]:
+            data["last_run"] = datetime.fromisoformat(data["last_run"])
+        if "next_run" in data and data["next_run"]:
+            data["next_run"] = datetime.fromisoformat(data["next_run"])
         return cls(**data)
 
 
@@ -76,7 +78,9 @@ class BackupScheduler:
         if not APSCHEDULER_AVAILABLE:
             raise ImportError("APScheduler not available")
 
-        self.schedules_file = schedules_file or Path.home() / '.config' / 'nimbus' / 'schedules.json'
+        self.schedules_file = (
+            schedules_file or Path.home() / ".config" / "nimbus" / "schedules.json"
+        )
         self.scheduler = BackgroundScheduler()
         self.schedules: Dict[str, BackupSchedule] = {}
         self.backup_callback: Optional[Callable] = None
@@ -90,14 +94,16 @@ class BackupScheduler:
         """Load schedules from file."""
         if self.schedules_file.exists():
             try:
-                with open(self.schedules_file, 'r') as f:
+                with open(self.schedules_file, "r") as f:
                     data = json.load(f)
 
                 for schedule_data in data:
                     schedule = BackupSchedule.from_dict(schedule_data)
                     self.schedules[schedule.id] = schedule
 
-                logger.info(f"Loaded {len(self.schedules)} schedules from {self.schedules_file}")
+                logger.info(
+                    f"Loaded {len(self.schedules)} schedules from {self.schedules_file}"
+                )
 
             except Exception as e:
                 logger.error(f"Failed to load schedules: {e}")
@@ -109,10 +115,12 @@ class BackupScheduler:
 
             data = [schedule.to_dict() for schedule in self.schedules.values()]
 
-            with open(self.schedules_file, 'w') as f:
+            with open(self.schedules_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-            logger.debug(f"Saved {len(self.schedules)} schedules to {self.schedules_file}")
+            logger.debug(
+                f"Saved {len(self.schedules)} schedules to {self.schedules_file}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to save schedules: {e}")
@@ -262,7 +270,7 @@ class BackupScheduler:
             trigger=trigger,
             id=schedule.id,
             name=schedule.name,
-            args=[schedule]
+            args=[schedule],
         )
 
         # Update next run time
@@ -280,21 +288,21 @@ class BackupScheduler:
         Returns:
             APScheduler trigger
         """
-        if schedule.frequency == 'hourly':
+        if schedule.frequency == "hourly":
             return IntervalTrigger(hours=1)
 
-        elif schedule.frequency == 'daily':
-            hour, minute = self._parse_time(schedule.time or '00:00')
+        elif schedule.frequency == "daily":
+            hour, minute = self._parse_time(schedule.time or "00:00")
             return CronTrigger(hour=hour, minute=minute)
 
-        elif schedule.frequency == 'weekly':
-            hour, minute = self._parse_time(schedule.time or '00:00')
-            days = schedule.days or ['monday']
-            day_of_week = ','.join(days)
+        elif schedule.frequency == "weekly":
+            hour, minute = self._parse_time(schedule.time or "00:00")
+            days = schedule.days or ["monday"]
+            day_of_week = ",".join(days)
             return CronTrigger(day_of_week=day_of_week, hour=hour, minute=minute)
 
-        elif schedule.frequency == 'monthly':
-            hour, minute = self._parse_time(schedule.time or '00:00')
+        elif schedule.frequency == "monthly":
+            hour, minute = self._parse_time(schedule.time or "00:00")
             return CronTrigger(day=1, hour=hour, minute=minute)
 
         else:
@@ -311,7 +319,7 @@ class BackupScheduler:
             Tuple of (hour, minute)
         """
         try:
-            hour, minute = map(int, time_str.split(':'))
+            hour, minute = map(int, time_str.split(":"))
             return hour, minute
         except:
             return 0, 0

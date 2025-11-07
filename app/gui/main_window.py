@@ -6,17 +6,33 @@ Provides a modern desktop interface for Nimbus backup operations.
 
 from pathlib import Path
 from typing import Optional
+
 from loguru import logger
 
 try:
-    from PyQt6.QtWidgets import (
-        QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-        QPushButton, QLabel, QLineEdit, QTextEdit, QProgressBar,
-        QFileDialog, QTabWidget, QTableWidget, QTableWidgetItem,
-        QMessageBox, QCheckBox, QComboBox, QGroupBox, QSpinBox
-    )
     from PyQt6.QtCore import Qt, QThread, pyqtSignal
-    from PyQt6.QtGui import QIcon, QFont
+    from PyQt6.QtGui import QFont, QIcon
+    from PyQt6.QtWidgets import (
+        QCheckBox,
+        QComboBox,
+        QFileDialog,
+        QGroupBox,
+        QHBoxLayout,
+        QLabel,
+        QLineEdit,
+        QMainWindow,
+        QMessageBox,
+        QProgressBar,
+        QPushButton,
+        QSpinBox,
+        QTableWidget,
+        QTableWidgetItem,
+        QTabWidget,
+        QTextEdit,
+        QVBoxLayout,
+        QWidget,
+    )
+
     PYQT6_AVAILABLE = True
 except ImportError:
     PYQT6_AVAILABLE = False
@@ -24,6 +40,7 @@ except ImportError:
 
 
 if PYQT6_AVAILABLE:
+
     class BackupWorker(QThread):
         """Background worker for backup operations."""
 
@@ -50,16 +67,12 @@ if PYQT6_AVAILABLE:
                 from app.core.backup import BackupEngine, IncrementalBackup
 
                 # Create backup engine
-                if self.options.get('incremental', False):
+                if self.options.get("incremental", False):
                     engine = IncrementalBackup(
-                        Path(self.source),
-                        Path(self.destination)
+                        Path(self.source), Path(self.destination)
                     )
                 else:
-                    engine = BackupEngine(
-                        Path(self.source),
-                        Path(self.destination)
-                    )
+                    engine = BackupEngine(Path(self.source), Path(self.destination))
 
                 # Progress callback
                 def progress_callback(data):
@@ -74,7 +87,6 @@ if PYQT6_AVAILABLE:
             except Exception as e:
                 logger.error(f"Backup failed: {e}")
                 self.error.emit(str(e))
-
 
     class MainWindow(QMainWindow):
         """Main application window."""
@@ -240,9 +252,9 @@ if PYQT6_AVAILABLE:
             # Table for backup history
             self.history_table = QTableWidget()
             self.history_table.setColumnCount(6)
-            self.history_table.setHorizontalHeaderLabels([
-                "Date", "Source", "Destination", "Files", "Size", "Status"
-            ])
+            self.history_table.setHorizontalHeaderLabels(
+                ["Date", "Source", "Destination", "Files", "Size", "Status"]
+            )
 
             layout.addWidget(self.history_table)
 
@@ -296,8 +308,7 @@ if PYQT6_AVAILABLE:
         def browse_source(self):
             """Browse for source directory."""
             directory = QFileDialog.getExistingDirectory(
-                self,
-                "Select Source Directory"
+                self, "Select Source Directory"
             )
 
             if directory:
@@ -306,8 +317,7 @@ if PYQT6_AVAILABLE:
         def browse_destination(self):
             """Browse for destination directory."""
             directory = QFileDialog.getExistingDirectory(
-                self,
-                "Select Destination Directory"
+                self, "Select Destination Directory"
             )
 
             if directory:
@@ -323,24 +333,22 @@ if PYQT6_AVAILABLE:
                 QMessageBox.warning(
                     self,
                     "Invalid Input",
-                    "Please select both source and destination directories."
+                    "Please select both source and destination directories.",
                 )
                 return
 
             if not Path(source).exists():
                 QMessageBox.warning(
-                    self,
-                    "Invalid Source",
-                    "Source directory does not exist."
+                    self, "Invalid Source", "Source directory does not exist."
                 )
                 return
 
             # Prepare options
             options = {
-                'incremental': self.incremental_check.isChecked(),
-                'encrypt': self.encrypt_check.isChecked(),
-                'compress': self.compress_check.isChecked(),
-                'verify': self.verify_check.isChecked()
+                "incremental": self.incremental_check.isChecked(),
+                "encrypt": self.encrypt_check.isChecked(),
+                "compress": self.compress_check.isChecked(),
+                "verify": self.verify_check.isChecked(),
             }
 
             # Disable start button
@@ -362,23 +370,23 @@ if PYQT6_AVAILABLE:
 
         def on_backup_progress(self, data: dict):
             """Handle backup progress update."""
-            phase = data.get('phase', 'unknown')
+            phase = data.get("phase", "unknown")
 
-            if phase == 'scanning':
-                total_files = data.get('total_files', 0)
+            if phase == "scanning":
+                total_files = data.get("total_files", 0)
                 self.progress_label.setText(f"Scanning... {total_files} files found")
 
-            elif phase == 'backing_up':
-                backed_up = data.get('backed_up_files', 0)
-                total = data.get('total_files', 1)
-                percentage = data.get('percentage', 0)
+            elif phase == "backing_up":
+                backed_up = data.get("backed_up_files", 0)
+                total = data.get("total_files", 1)
+                percentage = data.get("percentage", 0)
 
                 self.progress_label.setText(
                     f"Backing up... {backed_up}/{total} files ({percentage:.1f}%)"
                 )
                 self.progress_bar.setValue(int(percentage))
 
-                current_file = data.get('current_file', '')
+                current_file = data.get("current_file", "")
                 self.log_text.append(f"Backing up: {Path(current_file).name}")
 
         def on_backup_finished(self, stats: dict):
@@ -386,9 +394,9 @@ if PYQT6_AVAILABLE:
             self.start_backup_btn.setEnabled(True)
             self.stop_backup_btn.setEnabled(False)
 
-            backed_up = stats.get('backed_up_files', 0)
-            total = stats.get('total_files', 0)
-            failed = stats.get('failed_files', 0)
+            backed_up = stats.get("backed_up_files", 0)
+            total = stats.get("total_files", 0)
+            failed = stats.get("failed_files", 0)
 
             self.progress_label.setText(
                 f"Backup completed! {backed_up}/{total} files backed up, {failed} failed"
@@ -406,7 +414,7 @@ if PYQT6_AVAILABLE:
                 self,
                 "Backup Complete",
                 f"Backup completed successfully!\n\n"
-                f"Files backed up: {backed_up}/{total}"
+                f"Files backed up: {backed_up}/{total}",
             )
 
         def on_backup_error(self, error: str):
@@ -420,9 +428,7 @@ if PYQT6_AVAILABLE:
             self.statusBar().showMessage("Backup failed")
 
             QMessageBox.critical(
-                self,
-                "Backup Error",
-                f"Backup failed with error:\n\n{error}"
+                self, "Backup Error", f"Backup failed with error:\n\n{error}"
             )
 
         def refresh_history(self):
@@ -436,16 +442,34 @@ if PYQT6_AVAILABLE:
                     self.history_table.setRowCount(len(records))
 
                     for i, record in enumerate(records):
-                        self.history_table.setItem(i, 0, QTableWidgetItem(
-                            record.started_at.strftime('%Y-%m-%d %H:%M') if record.started_at else ''
-                        ))
-                        self.history_table.setItem(i, 1, QTableWidgetItem(record.source))
-                        self.history_table.setItem(i, 2, QTableWidgetItem(record.destination))
-                        self.history_table.setItem(i, 3, QTableWidgetItem(str(record.backed_up_files)))
-                        self.history_table.setItem(i, 4, QTableWidgetItem(
-                            f"{record.transferred_size / (1024**3):.2f} GB"
-                        ))
-                        self.history_table.setItem(i, 5, QTableWidgetItem(record.status))
+                        self.history_table.setItem(
+                            i,
+                            0,
+                            QTableWidgetItem(
+                                record.started_at.strftime("%Y-%m-%d %H:%M")
+                                if record.started_at
+                                else ""
+                            ),
+                        )
+                        self.history_table.setItem(
+                            i, 1, QTableWidgetItem(record.source)
+                        )
+                        self.history_table.setItem(
+                            i, 2, QTableWidgetItem(record.destination)
+                        )
+                        self.history_table.setItem(
+                            i, 3, QTableWidgetItem(str(record.backed_up_files))
+                        )
+                        self.history_table.setItem(
+                            i,
+                            4,
+                            QTableWidgetItem(
+                                f"{record.transferred_size / (1024**3):.2f} GB"
+                            ),
+                        )
+                        self.history_table.setItem(
+                            i, 5, QTableWidgetItem(record.status)
+                        )
 
             except Exception as e:
                 logger.error(f"Failed to refresh history: {e}")

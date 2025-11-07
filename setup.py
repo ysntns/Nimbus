@@ -55,6 +55,7 @@ setup(
         'loguru>=0.7.0',
         'pyyaml>=6.0',
         'psutil>=5.9.0',
+        'requests>=2.31.0',
     ],
     extras_require={
         'gui': [

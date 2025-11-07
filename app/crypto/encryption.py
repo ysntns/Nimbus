@@ -4,14 +4,15 @@ Encryption Module - AES-256 encryption for backup files
 Provides secure encryption and decryption functionality using AES-256-GCM.
 """
 
-import os
 import hashlib
+import os
 from pathlib import Path
 from typing import Optional, Tuple
+
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
 from loguru import logger
 
 
@@ -45,7 +46,9 @@ class EncryptionManager:
 
         logger.info("Encryption manager initialized")
 
-    def _derive_key_from_password(self, password: str, salt: Optional[bytes] = None) -> bytes:
+    def _derive_key_from_password(
+        self, password: str, salt: Optional[bytes] = None
+    ) -> bytes:
         """Derive encryption key from password using PBKDF2.
 
         Args:
@@ -63,11 +66,13 @@ class EncryptionManager:
             length=self.KEY_SIZE,
             salt=salt,
             iterations=self.KDF_ITERATIONS,
-            backend=default_backend()
+            backend=default_backend(),
         )
 
-        key = kdf.derive(password.encode('utf-8'))
-        logger.debug(f"Key derived from password using PBKDF2 ({self.KDF_ITERATIONS} iterations)")
+        key = kdf.derive(password.encode("utf-8"))
+        logger.debug(
+            f"Key derived from password using PBKDF2 ({self.KDF_ITERATIONS} iterations)"
+        )
 
         return key
 
@@ -81,11 +86,13 @@ class EncryptionManager:
             Encryption key
         """
         try:
-            with open(key_file, 'rb') as f:
+            with open(key_file, "rb") as f:
                 key = f.read()
 
             if len(key) != self.KEY_SIZE:
-                raise ValueError(f"Invalid key size: {len(key)} bytes (expected {self.KEY_SIZE})")
+                raise ValueError(
+                    f"Invalid key size: {len(key)} bytes (expected {self.KEY_SIZE})"
+                )
 
             logger.info(f"Encryption key loaded from {key_file}")
             return key
@@ -110,7 +117,7 @@ class EncryptionManager:
             key_file.parent.mkdir(parents=True, exist_ok=True)
 
             # Write key with restricted permissions
-            with open(key_file, 'wb') as f:
+            with open(key_file, "wb") as f:
                 f.write(key_to_save)
 
             # Set file permissions to 600 (read/write for owner only)
@@ -133,7 +140,9 @@ class EncryptionManager:
         logger.info("New encryption key generated")
         return key
 
-    def encrypt_data(self, data: bytes, associated_data: Optional[bytes] = None) -> Tuple[bytes, bytes]:
+    def encrypt_data(
+        self, data: bytes, associated_data: Optional[bytes] = None
+    ) -> Tuple[bytes, bytes]:
         """Encrypt data using AES-256-GCM.
 
         Args:
@@ -159,7 +168,9 @@ class EncryptionManager:
 
         return nonce, ciphertext
 
-    def decrypt_data(self, nonce: bytes, ciphertext: bytes, associated_data: Optional[bytes] = None) -> bytes:
+    def decrypt_data(
+        self, nonce: bytes, ciphertext: bytes, associated_data: Optional[bytes] = None
+    ) -> bytes:
         """Decrypt data using AES-256-GCM.
 
         Args:
@@ -186,7 +197,9 @@ class EncryptionManager:
             logger.error(f"Decryption failed: {e}")
             raise ValueError("Decryption failed - invalid key or corrupted data")
 
-    def encrypt_file(self, input_file: Path, output_file: Path, chunk_size: int = 64 * 1024):
+    def encrypt_file(
+        self, input_file: Path, output_file: Path, chunk_size: int = 64 * 1024
+    ):
         """Encrypt a file.
 
         Args:
@@ -205,7 +218,7 @@ class EncryptionManager:
             cipher = AESGCM(self.key)
 
             # Read input file
-            with open(input_file, 'rb') as f:
+            with open(input_file, "rb") as f:
                 plaintext = f.read()
 
             # Encrypt
@@ -213,7 +226,7 @@ class EncryptionManager:
 
             # Write output file (nonce + ciphertext)
             output_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_file, 'wb') as f:
+            with open(output_file, "wb") as f:
                 f.write(nonce)
                 f.write(ciphertext)
 
@@ -235,7 +248,7 @@ class EncryptionManager:
 
         try:
             # Read encrypted file
-            with open(input_file, 'rb') as f:
+            with open(input_file, "rb") as f:
                 nonce = f.read(self.NONCE_SIZE)
                 ciphertext = f.read()
 
@@ -247,7 +260,7 @@ class EncryptionManager:
 
             # Write output file
             output_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_file, 'wb') as f:
+            with open(output_file, "wb") as f:
                 f.write(plaintext)
 
             logger.info(f"Decrypted file: {input_file} -> {output_file}")
@@ -267,8 +280,8 @@ class EncryptionManager:
         """
         sha256 = hashlib.sha256()
 
-        with open(file_path, 'rb') as f:
-            for chunk in iter(lambda: f.read(8192), b''):
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
                 sha256.update(chunk)
 
         return sha256.hexdigest()

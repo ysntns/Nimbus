@@ -1,0 +1,25 @@
+# Optional Dependencies
+# Install as needed based on features you want to use
+
+# Cloud Providers
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+dropbox>=11.36.0
+boto3>=1.28.0
+
+# Encryption
+cryptography>=41.0.0
+
+# GUI
+PyQt6>=6.5.0
+
+# Scheduler
+apscheduler>=3.10.0
+
+# Compression (advanced)
+zstandard>=0.21.0
+
+# Notifications
+requests>=2.31.0
+plyer>=2.1.0

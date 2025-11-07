@@ -5,10 +5,11 @@ Stores backup metadata, history, and statistics.
 """
 
 import sqlite3
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 from loguru import logger
 
 
@@ -46,7 +47,7 @@ class BackupDatabase:
             db_path: Path to database file (default: ~/.config/nimbus/backups.db)
         """
         if db_path is None:
-            db_path = Path.home() / '.config' / 'nimbus' / 'backups.db'
+            db_path = Path.home() / ".config" / "nimbus" / "backups.db"
 
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -64,7 +65,8 @@ class BackupDatabase:
         cursor = self.conn.cursor()
 
         # Create backups table
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS backups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 source TEXT NOT NULL,
@@ -85,18 +87,23 @@ class BackupDatabase:
                 compressed BOOLEAN,
                 cloud_provider TEXT
             )
-        ''')
+        """
+        )
 
         # Create index on status and started_at
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_backups_status
             ON backups(status)
-        ''')
+        """
+        )
 
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE INDEX IF NOT EXISTS idx_backups_started_at
             ON backups(started_at DESC)
-        ''')
+        """
+        )
 
         self.conn.commit()
 
@@ -113,32 +120,35 @@ class BackupDatabase:
         """
         cursor = self.conn.cursor()
 
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO backups (
                 source, destination, started_at, completed_at, status,
                 backup_type, total_files, backed_up_files, failed_files,
                 skipped_files, total_size, transferred_size, duration_seconds,
                 error_message, encrypted, compressed, cloud_provider
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            record.source,
-            record.destination,
-            record.started_at.isoformat() if record.started_at else None,
-            record.completed_at.isoformat() if record.completed_at else None,
-            record.status,
-            record.backup_type,
-            record.total_files,
-            record.backed_up_files,
-            record.failed_files,
-            record.skipped_files,
-            record.total_size,
-            record.transferred_size,
-            record.duration_seconds,
-            record.error_message,
-            record.encrypted,
-            record.compressed,
-            record.cloud_provider
-        ))
+        """,
+            (
+                record.source,
+                record.destination,
+                record.started_at.isoformat() if record.started_at else None,
+                record.completed_at.isoformat() if record.completed_at else None,
+                record.status,
+                record.backup_type,
+                record.total_files,
+                record.backed_up_files,
+                record.failed_files,
+                record.skipped_files,
+                record.total_size,
+                record.transferred_size,
+                record.duration_seconds,
+                record.error_message,
+                record.encrypted,
+                record.compressed,
+                record.cloud_provider,
+            ),
+        )
 
         self.conn.commit()
 
@@ -158,7 +168,8 @@ class BackupDatabase:
 
         cursor = self.conn.cursor()
 
-        cursor.execute('''
+        cursor.execute(
+            """
             UPDATE backups SET
                 source = ?, destination = ?, started_at = ?, completed_at = ?,
                 status = ?, backup_type = ?, total_files = ?, backed_up_files = ?,
@@ -166,26 +177,28 @@ class BackupDatabase:
                 duration_seconds = ?, error_message = ?, encrypted = ?, compressed = ?,
                 cloud_provider = ?
             WHERE id = ?
-        ''', (
-            record.source,
-            record.destination,
-            record.started_at.isoformat() if record.started_at else None,
-            record.completed_at.isoformat() if record.completed_at else None,
-            record.status,
-            record.backup_type,
-            record.total_files,
-            record.backed_up_files,
-            record.failed_files,
-            record.skipped_files,
-            record.total_size,
-            record.transferred_size,
-            record.duration_seconds,
-            record.error_message,
-            record.encrypted,
-            record.compressed,
-            record.cloud_provider,
-            record.id
-        ))
+        """,
+            (
+                record.source,
+                record.destination,
+                record.started_at.isoformat() if record.started_at else None,
+                record.completed_at.isoformat() if record.completed_at else None,
+                record.status,
+                record.backup_type,
+                record.total_files,
+                record.backed_up_files,
+                record.failed_files,
+                record.skipped_files,
+                record.total_size,
+                record.transferred_size,
+                record.duration_seconds,
+                record.error_message,
+                record.encrypted,
+                record.compressed,
+                record.cloud_provider,
+                record.id,
+            ),
+        )
 
         self.conn.commit()
 
@@ -201,7 +214,7 @@ class BackupDatabase:
             BackupRecord or None if not found
         """
         cursor = self.conn.cursor()
-        cursor.execute('SELECT * FROM backups WHERE id = ?', (record_id,))
+        cursor.execute("SELECT * FROM backups WHERE id = ?", (record_id,))
 
         row = cursor.fetchone()
 
@@ -211,10 +224,7 @@ class BackupDatabase:
             return None
 
     def list_backup_records(
-        self,
-        limit: int = 100,
-        offset: int = 0,
-        status: Optional[str] = None
+        self, limit: int = 100, offset: int = 0, status: Optional[str] = None
     ) -> List[BackupRecord]:
         """List backup records.
 
@@ -229,18 +239,24 @@ class BackupDatabase:
         cursor = self.conn.cursor()
 
         if status:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM backups
                 WHERE status = ?
                 ORDER BY started_at DESC
                 LIMIT ? OFFSET ?
-            ''', (status, limit, offset))
+            """,
+                (status, limit, offset),
+            )
         else:
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT * FROM backups
                 ORDER BY started_at DESC
                 LIMIT ? OFFSET ?
-            ''', (limit, offset))
+            """,
+                (limit, offset),
+            )
 
         rows = cursor.fetchall()
 
@@ -257,30 +273,38 @@ class BackupDatabase:
         stats = {}
 
         # Total backups
-        cursor.execute('SELECT COUNT(*) as count FROM backups')
-        stats['total_backups'] = cursor.fetchone()['count']
+        cursor.execute("SELECT COUNT(*) as count FROM backups")
+        stats["total_backups"] = cursor.fetchone()["count"]
 
         # Backups by status
-        cursor.execute('SELECT status, COUNT(*) as count FROM backups GROUP BY status')
-        stats['by_status'] = {row['status']: row['count'] for row in cursor.fetchall()}
+        cursor.execute("SELECT status, COUNT(*) as count FROM backups GROUP BY status")
+        stats["by_status"] = {row["status"]: row["count"] for row in cursor.fetchall()}
 
         # Total data transferred
-        cursor.execute('SELECT SUM(transferred_size) as total FROM backups WHERE status = "completed"')
+        cursor.execute(
+            'SELECT SUM(transferred_size) as total FROM backups WHERE status = "completed"'
+        )
         result = cursor.fetchone()
-        stats['total_transferred'] = result['total'] or 0
+        stats["total_transferred"] = result["total"] or 0
 
         # Average duration
-        cursor.execute('SELECT AVG(duration_seconds) as avg FROM backups WHERE status = "completed"')
+        cursor.execute(
+            'SELECT AVG(duration_seconds) as avg FROM backups WHERE status = "completed"'
+        )
         result = cursor.fetchone()
-        stats['avg_duration_seconds'] = result['avg'] or 0
+        stats["avg_duration_seconds"] = result["avg"] or 0
 
         # Recent backups
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT * FROM backups
             ORDER BY started_at DESC
             LIMIT 10
-        ''')
-        stats['recent_backups'] = [self._row_to_record(row) for row in cursor.fetchall()]
+        """
+        )
+        stats["recent_backups"] = [
+            self._row_to_record(row) for row in cursor.fetchall()
+        ]
 
         return stats
 
@@ -298,10 +322,13 @@ class BackupDatabase:
         cutoff_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         cutoff_date = cutoff_date.replace(day=cutoff_date.day - days)
 
-        cursor.execute('''
+        cursor.execute(
+            """
             DELETE FROM backups
             WHERE started_at < ?
-        ''', (cutoff_date.isoformat(),))
+        """,
+            (cutoff_date.isoformat(),),
+        )
 
         deleted_count = cursor.rowcount
         self.conn.commit()
@@ -320,24 +347,30 @@ class BackupDatabase:
             BackupRecord object
         """
         return BackupRecord(
-            id=row['id'],
-            source=row['source'],
-            destination=row['destination'],
-            started_at=datetime.fromisoformat(row['started_at']) if row['started_at'] else None,
-            completed_at=datetime.fromisoformat(row['completed_at']) if row['completed_at'] else None,
-            status=row['status'],
-            backup_type=row['backup_type'],
-            total_files=row['total_files'],
-            backed_up_files=row['backed_up_files'],
-            failed_files=row['failed_files'],
-            skipped_files=row['skipped_files'],
-            total_size=row['total_size'],
-            transferred_size=row['transferred_size'],
-            duration_seconds=row['duration_seconds'],
-            error_message=row['error_message'],
-            encrypted=bool(row['encrypted']),
-            compressed=bool(row['compressed']),
-            cloud_provider=row['cloud_provider']
+            id=row["id"],
+            source=row["source"],
+            destination=row["destination"],
+            started_at=(
+                datetime.fromisoformat(row["started_at"]) if row["started_at"] else None
+            ),
+            completed_at=(
+                datetime.fromisoformat(row["completed_at"])
+                if row["completed_at"]
+                else None
+            ),
+            status=row["status"],
+            backup_type=row["backup_type"],
+            total_files=row["total_files"],
+            backed_up_files=row["backed_up_files"],
+            failed_files=row["failed_files"],
+            skipped_files=row["skipped_files"],
+            total_size=row["total_size"],
+            transferred_size=row["transferred_size"],
+            duration_seconds=row["duration_seconds"],
+            error_message=row["error_message"],
+            encrypted=bool(row["encrypted"]),
+            compressed=bool(row["compressed"]),
+            cloud_provider=row["cloud_provider"],
         )
 
     def close(self):

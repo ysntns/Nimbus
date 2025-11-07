@@ -5,11 +5,14 @@ Main entry point for the GUI application.
 """
 
 import sys
+
 from loguru import logger
 
 try:
     from PyQt6.QtWidgets import QApplication
+
     from app.gui.main_window import MainWindow
+
     PYQT6_AVAILABLE = True
 except ImportError:
     PYQT6_AVAILABLE = False
@@ -39,5 +42,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

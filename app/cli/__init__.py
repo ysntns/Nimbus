@@ -7,4 +7,4 @@ terminal output and user interaction.
 
 from app.cli.main import cli
 
-__all__ = ['cli']
+__all__ = ["cli"]
