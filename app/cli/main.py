@@ -139,7 +139,7 @@ def restore(backup_path, restore_path):
         raise click.Abort()
 
 
-@cli.group()
+@cli.group(name='config')
 def config_cmd():
     """Manage Nimbus configuration."""
     pass
@@ -204,13 +204,13 @@ def config_reset():
         raise click.Abort()
 
 
-@cli.group()
-def schedule():
+@cli.group(name='schedule')
+def schedule_cmd():
     """Manage backup schedules."""
     pass
 
 
-@schedule.command('add')
+@schedule_cmd.command('add')
 @click.option('--source', '-s', required=True, help='Source directory')
 @click.option('--destination', '-d', required=True, help='Destination path')
 @click.option('--time', '-t', default='23:00', help='Backup time (HH:MM)')

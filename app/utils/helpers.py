@@ -175,7 +175,12 @@ def is_path_safe(path: Union[str, Path], base_path: Union[str, Path]) -> bool:
     try:
         path = Path(path).resolve()
         base_path = Path(base_path).resolve()
-        return path.is_relative_to(base_path)
+        # Python 3.8 compatible version (is_relative_to is 3.9+)
+        try:
+            path.relative_to(base_path)
+            return True
+        except ValueError:
+            return False
     except (ValueError, RuntimeError):
         return False
 
