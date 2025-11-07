@@ -31,9 +31,7 @@ class CompressionManager:
     # Default compression levels
     DEFAULT_LEVELS = {"gzip": 6, "bz2": 9, "lzma": 6, "zstd": 3}
 
-    def __init__(
-        self, compression_type: CompressionType = "gzip", level: Optional[int] = None
-    ):
+    def __init__(self, compression_type: CompressionType = "gzip", level: Optional[int] = None):
         """Initialize compression manager.
 
         Args:
@@ -47,9 +45,7 @@ class CompressionManager:
             logger.warning("zstd not available, falling back to gzip")
             self.compression_type = "gzip"
 
-        logger.info(
-            f"Compression manager initialized: {self.compression_type} (level {self.level})"
-        )
+        logger.info(f"Compression manager initialized: {self.compression_type} (level {self.level})")
 
     def compress_file(
         self,
@@ -93,9 +89,7 @@ class CompressionManager:
             compressed_size = output_file.stat().st_size
             ratio = (1 - compressed_size / original_size) * 100
 
-            logger.info(
-                f"Compression complete: {original_size} -> {compressed_size} bytes ({ratio:.1f}% reduction)"
-            )
+            logger.info(f"Compression complete: {original_size} -> {compressed_size} bytes ({ratio:.1f}% reduction)")
 
             # Remove source if requested
             if remove_source:

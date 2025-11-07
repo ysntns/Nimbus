@@ -28,9 +28,7 @@ try:
     GOOGLE_DRIVE_AVAILABLE = True
 except ImportError:
     GOOGLE_DRIVE_AVAILABLE = False
-    logger.warning(
-        "Google Drive API not available - install with: pip install google-api-python-client google-auth-oauthlib"
-    )
+    logger.warning("Google Drive API not available - install with: pip install google-api-python-client google-auth-oauthlib")
 
 
 class GoogleDriveProvider(CloudProvider):
@@ -39,9 +37,7 @@ class GoogleDriveProvider(CloudProvider):
     # OAuth 2.0 scopes
     SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
-    def __init__(
-        self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None):
         """Initialize Google Drive provider.
 
         Args:
@@ -74,9 +70,7 @@ class GoogleDriveProvider(CloudProvider):
                 if creds and creds.expired and creds.refresh_token:
                     creds.refresh(Request())
                 else:
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        self.credentials["credentials_file"], self.SCOPES
-                    )
+                    flow = InstalledAppFlow.from_client_secrets_file(self.credentials["credentials_file"], self.SCOPES)
                     creds = flow.run_local_server(port=0)
 
                 # Save credentials for next time
@@ -122,22 +116,14 @@ class GoogleDriveProvider(CloudProvider):
             }
 
             # Create media upload
-            media = MediaFileUpload(
-                str(local_path), resumable=True, chunksize=1024 * 1024  # 1MB chunks
-            )
+            media = MediaFileUpload(str(local_path), resumable=True, chunksize=1024 * 1024)  # 1MB chunks
 
             # Upload file
-            file = (
-                self.service.files()
-                .create(body=file_metadata, media_body=media, fields="id,name,size")
-                .execute()
-            )
+            file = self.service.files().create(body=file_metadata, media_body=media, fields="id,name,size").execute()
 
             file_size = local_path.stat().st_size
 
-            logger.info(
-                f"Uploaded {local_path.name} to Google Drive (ID: {file.get('id')})"
-            )
+            logger.info(f"Uploaded {local_path.name} to Google Drive (ID: {file.get('id')})")
 
             return UploadResult(
                 success=True,
@@ -208,9 +194,7 @@ class GoogleDriveProvider(CloudProvider):
             return []
 
         try:
-            query = (
-                f"'{self.folder_id}' in parents" if self.folder_id else "trashed=false"
-            )
+            query = f"'{self.folder_id}' in parents" if self.folder_id else "trashed=false"
 
             results = (
                 self.service.files()
@@ -232,9 +216,7 @@ class GoogleDriveProvider(CloudProvider):
                         name=file["name"],
                         path=file["id"],
                         size=int(file.get("size", 0)),
-                        modified=datetime.fromisoformat(
-                            file["modifiedTime"].replace("Z", "+00:00")
-                        ),
+                        modified=datetime.fromisoformat(file["modifiedTime"].replace("Z", "+00:00")),
                         checksum=file.get("md5Checksum"),
                         mime_type=file.get("mimeType"),
                     )
@@ -287,9 +269,7 @@ class GoogleDriveProvider(CloudProvider):
                 "parents": [self.folder_id] if self.folder_id else [],
             }
 
-            folder = (
-                self.service.files().create(body=file_metadata, fields="id").execute()
-            )
+            folder = self.service.files().create(body=file_metadata, fields="id").execute()
 
             logger.info(f"Created folder in Google Drive (ID: {folder.get('id')})")
             return True
@@ -325,9 +305,7 @@ class GoogleDriveProvider(CloudProvider):
                 name=file["name"],
                 path=file["id"],
                 size=int(file.get("size", 0)),
-                modified=datetime.fromisoformat(
-                    file["modifiedTime"].replace("Z", "+00:00")
-                ),
+                modified=datetime.fromisoformat(file["modifiedTime"].replace("Z", "+00:00")),
                 checksum=file.get("md5Checksum"),
                 mime_type=file.get("mimeType"),
             )

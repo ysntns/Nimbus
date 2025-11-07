@@ -46,9 +46,7 @@ class EncryptionManager:
 
         logger.info("Encryption manager initialized")
 
-    def _derive_key_from_password(
-        self, password: str, salt: Optional[bytes] = None
-    ) -> bytes:
+    def _derive_key_from_password(self, password: str, salt: Optional[bytes] = None) -> bytes:
         """Derive encryption key from password using PBKDF2.
 
         Args:
@@ -70,9 +68,7 @@ class EncryptionManager:
         )
 
         key = kdf.derive(password.encode("utf-8"))
-        logger.debug(
-            f"Key derived from password using PBKDF2 ({self.KDF_ITERATIONS} iterations)"
-        )
+        logger.debug(f"Key derived from password using PBKDF2 ({self.KDF_ITERATIONS} iterations)")
 
         return key
 
@@ -90,9 +86,7 @@ class EncryptionManager:
                 key = f.read()
 
             if len(key) != self.KEY_SIZE:
-                raise ValueError(
-                    f"Invalid key size: {len(key)} bytes (expected {self.KEY_SIZE})"
-                )
+                raise ValueError(f"Invalid key size: {len(key)} bytes (expected {self.KEY_SIZE})")
 
             logger.info(f"Encryption key loaded from {key_file}")
             return key
@@ -140,9 +134,7 @@ class EncryptionManager:
         logger.info("New encryption key generated")
         return key
 
-    def encrypt_data(
-        self, data: bytes, associated_data: Optional[bytes] = None
-    ) -> Tuple[bytes, bytes]:
+    def encrypt_data(self, data: bytes, associated_data: Optional[bytes] = None) -> Tuple[bytes, bytes]:
         """Encrypt data using AES-256-GCM.
 
         Args:
@@ -168,9 +160,7 @@ class EncryptionManager:
 
         return nonce, ciphertext
 
-    def decrypt_data(
-        self, nonce: bytes, ciphertext: bytes, associated_data: Optional[bytes] = None
-    ) -> bytes:
+    def decrypt_data(self, nonce: bytes, ciphertext: bytes, associated_data: Optional[bytes] = None) -> bytes:
         """Decrypt data using AES-256-GCM.
 
         Args:
@@ -197,9 +187,7 @@ class EncryptionManager:
             logger.error(f"Decryption failed: {e}")
             raise ValueError("Decryption failed - invalid key or corrupted data")
 
-    def encrypt_file(
-        self, input_file: Path, output_file: Path, chunk_size: int = 64 * 1024
-    ):
+    def encrypt_file(self, input_file: Path, output_file: Path, chunk_size: int = 64 * 1024):
         """Encrypt a file.
 
         Args:

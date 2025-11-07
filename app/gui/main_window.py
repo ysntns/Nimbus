@@ -66,9 +66,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
 
                 # Create backup engine
                 if self.options.get("incremental", False):
-                    engine = IncrementalBackup(
-                        Path(self.source), Path(self.destination)
-                    )
+                    engine = IncrementalBackup(Path(self.source), Path(self.destination))
                 else:
                     engine = BackupEngine(Path(self.source), Path(self.destination))
 
@@ -250,9 +248,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
             # Table for backup history
             self.history_table = QTableWidget()
             self.history_table.setColumnCount(6)
-            self.history_table.setHorizontalHeaderLabels(
-                ["Date", "Source", "Destination", "Files", "Size", "Status"]
-            )
+            self.history_table.setHorizontalHeaderLabels(["Date", "Source", "Destination", "Files", "Size", "Status"])
 
             layout.addWidget(self.history_table)
 
@@ -305,18 +301,14 @@ if PYQT6_AVAILABLE:  # noqa: C901
 
         def browse_source(self):
             """Browse for source directory."""
-            directory = QFileDialog.getExistingDirectory(
-                self, "Select Source Directory"
-            )
+            directory = QFileDialog.getExistingDirectory(self, "Select Source Directory")
 
             if directory:
                 self.source_input.setText(directory)
 
         def browse_destination(self):
             """Browse for destination directory."""
-            directory = QFileDialog.getExistingDirectory(
-                self, "Select Destination Directory"
-            )
+            directory = QFileDialog.getExistingDirectory(self, "Select Destination Directory")
 
             if directory:
                 self.dest_input.setText(directory)
@@ -336,9 +328,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
                 return
 
             if not Path(source).exists():
-                QMessageBox.warning(
-                    self, "Invalid Source", "Source directory does not exist."
-                )
+                QMessageBox.warning(self, "Invalid Source", "Source directory does not exist.")
                 return
 
             # Prepare options
@@ -379,9 +369,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
                 total = data.get("total_files", 1)
                 percentage = data.get("percentage", 0)
 
-                self.progress_label.setText(
-                    f"Backing up... {backed_up}/{total} files ({percentage:.1f}%)"
-                )
+                self.progress_label.setText(f"Backing up... {backed_up}/{total} files ({percentage:.1f}%)")
                 self.progress_bar.setValue(int(percentage))
 
                 current_file = data.get("current_file", "")
@@ -396,9 +384,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
             total = stats.get("total_files", 0)
             failed = stats.get("failed_files", 0)
 
-            self.progress_label.setText(
-                f"Backup completed! {backed_up}/{total} files backed up, {failed} failed"
-            )
+            self.progress_label.setText(f"Backup completed! {backed_up}/{total} files backed up, {failed} failed")
             self.progress_bar.setValue(100)
 
             self.log_text.append("\n=== Backup Completed ===")
@@ -411,8 +397,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
             QMessageBox.information(
                 self,
                 "Backup Complete",
-                f"Backup completed successfully!\n\n"
-                f"Files backed up: {backed_up}/{total}",
+                f"Backup completed successfully!\n\n" f"Files backed up: {backed_up}/{total}",
             )
 
         def on_backup_error(self, error: str):
@@ -425,9 +410,7 @@ if PYQT6_AVAILABLE:  # noqa: C901
 
             self.statusBar().showMessage("Backup failed")
 
-            QMessageBox.critical(
-                self, "Backup Error", f"Backup failed with error:\n\n{error}"
-            )
+            QMessageBox.critical(self, "Backup Error", f"Backup failed with error:\n\n{error}")
 
         def refresh_history(self):
             """Refresh backup history table."""
@@ -443,31 +426,17 @@ if PYQT6_AVAILABLE:  # noqa: C901
                         self.history_table.setItem(
                             i,
                             0,
-                            QTableWidgetItem(
-                                record.started_at.strftime("%Y-%m-%d %H:%M")
-                                if record.started_at
-                                else ""
-                            ),
+                            QTableWidgetItem(record.started_at.strftime("%Y-%m-%d %H:%M") if record.started_at else ""),
                         )
-                        self.history_table.setItem(
-                            i, 1, QTableWidgetItem(record.source)
-                        )
-                        self.history_table.setItem(
-                            i, 2, QTableWidgetItem(record.destination)
-                        )
-                        self.history_table.setItem(
-                            i, 3, QTableWidgetItem(str(record.backed_up_files))
-                        )
+                        self.history_table.setItem(i, 1, QTableWidgetItem(record.source))
+                        self.history_table.setItem(i, 2, QTableWidgetItem(record.destination))
+                        self.history_table.setItem(i, 3, QTableWidgetItem(str(record.backed_up_files)))
                         self.history_table.setItem(
                             i,
                             4,
-                            QTableWidgetItem(
-                                f"{record.transferred_size / (1024**3):.2f} GB"
-                            ),
+                            QTableWidgetItem(f"{record.transferred_size / (1024**3):.2f} GB"),
                         )
-                        self.history_table.setItem(
-                            i, 5, QTableWidgetItem(record.status)
-                        )
+                        self.history_table.setItem(i, 5, QTableWidgetItem(record.status))
 
             except Exception as e:
                 logger.error(f"Failed to refresh history: {e}")

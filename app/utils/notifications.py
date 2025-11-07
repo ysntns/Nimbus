@@ -26,9 +26,7 @@ try:
     DESKTOP_NOTIFICATION_AVAILABLE = True
 except ImportError:
     DESKTOP_NOTIFICATION_AVAILABLE = False
-    logger.warning(
-        "Desktop notifications not available - install with: pip install plyer"
-    )
+    logger.warning("Desktop notifications not available - install with: pip install plyer")
 
 
 class NotificationType(Enum):
@@ -152,9 +150,7 @@ class NotificationManager:
                 self.config.email_address,
             ]
         ):
-            logger.warning(
-                "Email configuration incomplete - skipping email notification"
-            )
+            logger.warning("Email configuration incomplete - skipping email notification")
             return
 
         try:
@@ -209,15 +205,11 @@ class NotificationManager:
             details: Optional additional details
         """
         if not REQUESTS_AVAILABLE:
-            logger.warning(
-                "Requests library not available - skipping Telegram notification"
-            )
+            logger.warning("Requests library not available - skipping Telegram notification")
             return
 
         if not all([self.config.telegram_token, self.config.telegram_chat_id]):
-            logger.warning(
-                "Telegram configuration incomplete - skipping Telegram notification"
-            )
+            logger.warning("Telegram configuration incomplete - skipping Telegram notification")
             return
 
         try:
@@ -231,9 +223,7 @@ class NotificationManager:
                     text += f"  • {key}: `{value}`\n"
 
             # Send via Telegram Bot API
-            url = (
-                f"https://api.telegram.org/bot{self.config.telegram_token}/sendMessage"
-            )
+            url = f"https://api.telegram.org/bot{self.config.telegram_token}/sendMessage"
             payload = {
                 "chat_id": self.config.telegram_chat_id,
                 "text": text,
@@ -250,9 +240,7 @@ class NotificationManager:
         except Exception as e:
             logger.error(f"Failed to send Telegram notification: {e}")
 
-    def _send_desktop(
-        self, notification_type: NotificationType, title: str, message: str
-    ):
+    def _send_desktop(self, notification_type: NotificationType, title: str, message: str):
         """Send desktop notification.
 
         Args:
@@ -321,15 +309,11 @@ class NotificationManager:
             details,
         )
 
-    def send_backup_warning(
-        self, warning: str, details: Optional[Dict[str, Any]] = None
-    ):
+    def send_backup_warning(self, warning: str, details: Optional[Dict[str, Any]] = None):
         """Send backup warning notification.
 
         Args:
             warning: Warning message
             details: Optional warning details
         """
-        self.send_notification(
-            NotificationType.WARNING, "Backup Warning", warning, details
-        )
+        self.send_notification(NotificationType.WARNING, "Backup Warning", warning, details)

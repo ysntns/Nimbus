@@ -51,9 +51,7 @@ class DownloadResult:
 class CloudProvider(ABC):
     """Abstract base class for cloud storage providers."""
 
-    def __init__(
-        self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None):
         """Initialize cloud provider.
 
         Args:

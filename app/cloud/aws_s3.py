@@ -29,9 +29,7 @@ except ImportError:
 class AWSS3Provider(CloudProvider):
     """AWS S3 cloud storage provider."""
 
-    def __init__(
-        self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, credentials: Dict[str, Any], config: Optional[Dict[str, Any]] = None):
         """Initialize AWS S3 provider.
 
         Args:
@@ -87,18 +85,14 @@ class AWSS3Provider(CloudProvider):
             UploadResult with operation details
         """
         if not self.authenticated or not self.bucket_name:
-            return UploadResult(
-                success=False, error="Not authenticated or bucket not set"
-            )
+            return UploadResult(success=False, error="Not authenticated or bucket not set")
 
         try:
             file_size = local_path.stat().st_size
 
             self.s3_client.upload_file(str(local_path), self.bucket_name, remote_path)
 
-            logger.info(
-                f"Uploaded {local_path.name} to S3: s3://{self.bucket_name}/{remote_path}"
-            )
+            logger.info(f"Uploaded {local_path.name} to S3: s3://{self.bucket_name}/{remote_path}")
 
             return UploadResult(
                 success=True,
@@ -128,9 +122,7 @@ class AWSS3Provider(CloudProvider):
             DownloadResult with operation details
         """
         if not self.authenticated or not self.bucket_name:
-            return DownloadResult(
-                success=False, error="Not authenticated or bucket not set"
-            )
+            return DownloadResult(success=False, error="Not authenticated or bucket not set")
 
         try:
             local_path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,9 +154,7 @@ class AWSS3Provider(CloudProvider):
         try:
             prefix = remote_path.lstrip("/")
 
-            response = self.s3_client.list_objects_v2(
-                Bucket=self.bucket_name, Prefix=prefix
-            )
+            response = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
 
             cloud_files = []
             for obj in response.get("Contents", []):
@@ -244,9 +234,7 @@ class AWSS3Provider(CloudProvider):
             return None
 
         try:
-            response = self.s3_client.head_object(
-                Bucket=self.bucket_name, Key=remote_path
-            )
+            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=remote_path)
 
             return CloudFile(
                 id=remote_path,

@@ -37,18 +37,14 @@ def cli(ctx):
 @click.option("--incremental", "-i", is_flag=True, help="Perform incremental backup")
 @click.option("--encrypt", "-e", is_flag=True, help="Encrypt backup")
 @click.option("--compress", "-c", is_flag=True, default=True, help="Compress backup")
-@click.option(
-    "--verify", "-v", is_flag=True, default=True, help="Verify backup integrity"
-)
+@click.option("--verify", "-v", is_flag=True, default=True, help="Verify backup integrity")
 def backup(source, destination, incremental, encrypt, compress, verify):
     """Backup files to specified destination."""
 
     console.print("\n[bold cyan]🚀 Starting Backup[/bold cyan]")
     console.print(f"Source: [green]{source}[/green]")
     console.print(f"Destination: [green]{destination}[/green]")
-    console.print(
-        f"Mode: [yellow]{'Incremental' if incremental else 'Full'}[/yellow]\n"
-    )
+    console.print(f"Mode: [yellow]{'Incremental' if incremental else 'Full'}[/yellow]\n")
 
     source_path = Path(source)
     dest_path = Path(destination)
@@ -136,9 +132,7 @@ def restore(backup_path, restore_path):
             progress.update(task, completed=100)
 
         console.print("\n[bold green]✅ Restore Completed![/bold green]")
-        console.print(
-            f"Files restored: {stats['restored_files']}/{stats['total_files']}\n"
-        )
+        console.print(f"Files restored: {stats['restored_files']}/{stats['total_files']}\n")
 
     except Exception as e:
         console.print(f"\n[bold red]❌ Restore Failed:[/bold red] {e}\n")
@@ -163,9 +157,7 @@ def config_show():
     table.add_column("Value", style="green")
 
     # Display key configuration settings
-    table.add_row(
-        "Default Destination", str(config.get("backup.default_destination", "Not set"))
-    )
+    table.add_row("Default Destination", str(config.get("backup.default_destination", "Not set")))
     table.add_row("Compression", str(config.get("backup.compression", True)))
     table.add_row("Encryption", str(config.get("backup.encryption", False)))
     table.add_row("Incremental", str(config.get("backup.incremental", True)))
@@ -200,9 +192,7 @@ def config_set(key, value):
 
 
 @config_cmd.command("reset")
-@click.confirmation_option(
-    prompt="Are you sure you want to reset configuration to default?"
-)
+@click.confirmation_option(prompt="Are you sure you want to reset configuration to default?")
 def config_reset():
     """Reset configuration to default values."""
 
@@ -255,9 +245,7 @@ def gui():
 
         gui_main()
     except ImportError:
-        console.print(
-            "[red]❌ GUI dependencies not installed. Install with: pip install nimbus-backup[gui][/red]\n"
-        )
+        console.print("[red]❌ GUI dependencies not installed. Install with: pip install nimbus-backup[gui][/red]\n")
         raise click.Abort()
 
 

@@ -223,9 +223,7 @@ class BackupDatabase:
         else:
             return None
 
-    def list_backup_records(
-        self, limit: int = 100, offset: int = 0, status: Optional[str] = None
-    ) -> List[BackupRecord]:
+    def list_backup_records(self, limit: int = 100, offset: int = 0, status: Optional[str] = None) -> List[BackupRecord]:
         """List backup records.
 
         Args:
@@ -281,16 +279,12 @@ class BackupDatabase:
         stats["by_status"] = {row["status"]: row["count"] for row in cursor.fetchall()}
 
         # Total data transferred
-        cursor.execute(
-            'SELECT SUM(transferred_size) as total FROM backups WHERE status = "completed"'
-        )
+        cursor.execute('SELECT SUM(transferred_size) as total FROM backups WHERE status = "completed"')
         result = cursor.fetchone()
         stats["total_transferred"] = result["total"] or 0
 
         # Average duration
-        cursor.execute(
-            'SELECT AVG(duration_seconds) as avg FROM backups WHERE status = "completed"'
-        )
+        cursor.execute('SELECT AVG(duration_seconds) as avg FROM backups WHERE status = "completed"')
         result = cursor.fetchone()
         stats["avg_duration_seconds"] = result["avg"] or 0
 
@@ -302,9 +296,7 @@ class BackupDatabase:
             LIMIT 10
         """
         )
-        stats["recent_backups"] = [
-            self._row_to_record(row) for row in cursor.fetchall()
-        ]
+        stats["recent_backups"] = [self._row_to_record(row) for row in cursor.fetchall()]
 
         return stats
 
@@ -350,14 +342,8 @@ class BackupDatabase:
             id=row["id"],
             source=row["source"],
             destination=row["destination"],
-            started_at=(
-                datetime.fromisoformat(row["started_at"]) if row["started_at"] else None
-            ),
-            completed_at=(
-                datetime.fromisoformat(row["completed_at"])
-                if row["completed_at"]
-                else None
-            ),
+            started_at=(datetime.fromisoformat(row["started_at"]) if row["started_at"] else None),
+            completed_at=(datetime.fromisoformat(row["completed_at"]) if row["completed_at"] else None),
             status=row["status"],
             backup_type=row["backup_type"],
             total_files=row["total_files"],

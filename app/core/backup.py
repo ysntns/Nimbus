@@ -76,9 +76,7 @@ class BackupEngine:
             logger.error(f"Error calculating checksum for {file_path}: {e}")
             return ""
 
-    def scan_directory(
-        self, progress_callback: Optional[Callable] = None
-    ) -> List[Path]:
+    def scan_directory(self, progress_callback: Optional[Callable] = None) -> List[Path]:
         """Scan source directory and collect files to backup.
 
         Args:
@@ -206,10 +204,7 @@ class BackupEngine:
         verify_backup = config.get("backup.verify_backup", True)
 
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
-            futures = {
-                executor.submit(self.backup_file, file_path, verify_backup): file_path
-                for file_path in files_to_backup
-            }
+            futures = {executor.submit(self.backup_file, file_path, verify_backup): file_path for file_path in files_to_backup}
 
             for future in as_completed(futures):
                 file_path = futures[future]
@@ -232,11 +227,7 @@ class BackupEngine:
                                 "total_files": self.stats["total_files"],
                                 "transferred_size": self.stats["transferred_size"],
                                 "total_size": self.stats["total_size"],
-                                "percentage": (
-                                    self.stats["backed_up_files"]
-                                    / self.stats["total_files"]
-                                    * 100
-                                ),
+                                "percentage": (self.stats["backed_up_files"] / self.stats["total_files"] * 100),
                             }
                         )
 
@@ -248,16 +239,12 @@ class BackupEngine:
         duration = (self.stats["end_time"] - self.stats["start_time"]).total_seconds()
 
         logger.info(f"Backup completed in {duration:.2f} seconds")
-        logger.info(
-            f"Files backed up: {self.stats['backed_up_files']}/{self.stats['total_files']}"
-        )
+        logger.info(f"Files backed up: {self.stats['backed_up_files']}/{self.stats['total_files']}")
         logger.info(f"Failed files: {self.stats['failed_files']}")
 
         return self.stats
 
-    def restore(
-        self, restore_path: Path, progress_callback: Optional[Callable] = None
-    ) -> Dict[str, Any]:
+    def restore(self, restore_path: Path, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
         """Restore backup to specified location.
 
         Args:
@@ -312,14 +299,10 @@ class BackupEngine:
                         logger.error(f"Error restoring {file_path}: {e}")
 
             restore_stats["end_time"] = datetime.now()
-            duration = (
-                restore_stats["end_time"] - restore_stats["start_time"]
-            ).total_seconds()
+            duration = (restore_stats["end_time"] - restore_stats["start_time"]).total_seconds()
 
             logger.info(f"Restore completed in {duration:.2f} seconds")
-            logger.info(
-                f"Files restored: {restore_stats['restored_files']}/{restore_stats['total_files']}"
-            )
+            logger.info(f"Files restored: {restore_stats['restored_files']}/{restore_stats['total_files']}")
 
             return restore_stats
 
@@ -331,9 +314,7 @@ class BackupEngine:
 class IncrementalBackup(BackupEngine):
     """Incremental backup engine - only backs up changed files."""
 
-    def __init__(
-        self, source: Path, destination: Path, manifest_file: Optional[Path] = None
-    ):
+    def __init__(self, source: Path, destination: Path, manifest_file: Optional[Path] = None):
         """Initialize incremental backup engine.
 
         Args:
@@ -423,18 +404,13 @@ class IncrementalBackup(BackupEngine):
         # Filter files that need backup
         files_to_backup = [f for f in all_files if self.file_needs_backup(f)]
 
-        logger.info(
-            f"Incremental backup: {len(files_to_backup)}/{len(all_files)} files need backup"
-        )
+        logger.info(f"Incremental backup: {len(files_to_backup)}/{len(all_files)} files need backup")
 
         # Backup files
         verify_backup = config.get("backup.verify_backup", True)
 
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
-            futures = {
-                executor.submit(self.backup_file, file_path, verify_backup): file_path
-                for file_path in files_to_backup
-            }
+            futures = {executor.submit(self.backup_file, file_path, verify_backup): file_path for file_path in files_to_backup}
 
             for future in as_completed(futures):
                 file_path = futures[future]

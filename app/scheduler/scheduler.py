@@ -77,9 +77,7 @@ class BackupScheduler:
         if not APSCHEDULER_AVAILABLE:
             raise ImportError("APScheduler not available")
 
-        self.schedules_file = (
-            schedules_file or Path.home() / ".config" / "nimbus" / "schedules.json"
-        )
+        self.schedules_file = schedules_file or Path.home() / ".config" / "nimbus" / "schedules.json"
         self.scheduler = BackgroundScheduler()
         self.schedules: Dict[str, BackupSchedule] = {}
         self.backup_callback: Optional[Callable] = None
@@ -100,9 +98,7 @@ class BackupScheduler:
                     schedule = BackupSchedule.from_dict(schedule_data)
                     self.schedules[schedule.id] = schedule
 
-                logger.info(
-                    f"Loaded {len(self.schedules)} schedules from {self.schedules_file}"
-                )
+                logger.info(f"Loaded {len(self.schedules)} schedules from {self.schedules_file}")
 
             except Exception as e:
                 logger.error(f"Failed to load schedules: {e}")
@@ -117,9 +113,7 @@ class BackupScheduler:
             with open(self.schedules_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-            logger.debug(
-                f"Saved {len(self.schedules)} schedules to {self.schedules_file}"
-            )
+            logger.debug(f"Saved {len(self.schedules)} schedules to {self.schedules_file}")
 
         except Exception as e:
             logger.error(f"Failed to save schedules: {e}")
