@@ -3,7 +3,31 @@ Cloud storage providers integration.
 
 Support for Google Drive, Dropbox, OneDrive, AWS S3, and other
 cloud storage services.
-(Coming in future release)
 """
 
-__all__ = []
+from app.cloud.base import (
+    CloudProvider,
+    CloudFile,
+    UploadResult,
+    DownloadResult,
+    CloudProviderFactory
+)
+
+__all__ = [
+    'CloudProvider',
+    'CloudFile',
+    'UploadResult',
+    'DownloadResult',
+    'CloudProviderFactory',
+]
+
+# Import providers (will auto-register if dependencies available)
+try:
+    from app.cloud import google_drive
+except ImportError:
+    pass
+
+try:
+    from app.cloud import aws_s3
+except ImportError:
+    pass
