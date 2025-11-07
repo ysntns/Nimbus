@@ -11,10 +11,8 @@ from loguru import logger
 
 try:
     from PyQt6.QtCore import Qt, QThread, pyqtSignal
-    from PyQt6.QtGui import QFont, QIcon
     from PyQt6.QtWidgets import (
         QCheckBox,
-        QComboBox,
         QFileDialog,
         QGroupBox,
         QHBoxLayout,
@@ -39,7 +37,7 @@ except ImportError:
     logger.warning("PyQt6 not available - install with: pip install PyQt6")
 
 
-if PYQT6_AVAILABLE:
+if PYQT6_AVAILABLE:  # noqa: C901
 
     class BackupWorker(QThread):
         """Background worker for backup operations."""

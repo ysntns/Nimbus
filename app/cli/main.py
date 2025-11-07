@@ -43,7 +43,7 @@ def cli(ctx):
 def backup(source, destination, incremental, encrypt, compress, verify):
     """Backup files to specified destination."""
 
-    console.print(f"\n[bold cyan]🚀 Starting Backup[/bold cyan]")
+    console.print("\n[bold cyan]🚀 Starting Backup[/bold cyan]")
     console.print(f"Source: [green]{source}[/green]")
     console.print(f"Destination: [green]{destination}[/green]")
     console.print(
@@ -81,7 +81,7 @@ def backup(source, destination, incremental, encrypt, compress, verify):
             progress.update(task, completed=100)
 
         # Display results
-        console.print(f"\n[bold green]✅ Backup Completed![/bold green]\n")
+        console.print("\n[bold green]✅ Backup Completed![/bold green]\n")
 
         table = Table(title="Backup Statistics")
         table.add_column("Metric", style="cyan")
@@ -111,7 +111,7 @@ def backup(source, destination, incremental, encrypt, compress, verify):
 def restore(backup_path, restore_path):
     """Restore files from backup."""
 
-    console.print(f"\n[bold cyan]🔄 Starting Restore[/bold cyan]")
+    console.print("\n[bold cyan]🔄 Starting Restore[/bold cyan]")
     console.print(f"Backup: [green]{backup_path}[/green]")
     console.print(f"Restore to: [green]{restore_path}[/green]\n")
 
@@ -135,7 +135,7 @@ def restore(backup_path, restore_path):
 
             progress.update(task, completed=100)
 
-        console.print(f"\n[bold green]✅ Restore Completed![/bold green]")
+        console.print("\n[bold green]✅ Restore Completed![/bold green]")
         console.print(
             f"Files restored: {stats['restored_files']}/{stats['total_files']}\n"
         )
@@ -234,7 +234,7 @@ def schedule_cmd():
 def schedule_add(source, destination, time, frequency):
     """Add a scheduled backup."""
 
-    console.print(f"\n[cyan]📅 Adding Schedule[/cyan]")
+    console.print("\n[cyan]📅 Adding Schedule[/cyan]")
     console.print(f"Source: {source}")
     console.print(f"Destination: {destination}")
     console.print(f"Time: {time}")

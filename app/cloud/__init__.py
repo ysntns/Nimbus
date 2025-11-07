@@ -23,11 +23,11 @@ __all__ = [
 
 # Import providers (will auto-register if dependencies available)
 try:
-    from app.cloud import google_drive
+    from app.cloud import google_drive  # noqa: F401
 except ImportError:
     pass
 
 try:
-    from app.cloud import aws_s3
+    from app.cloud import aws_s3  # noqa: F401
 except ImportError:
     pass

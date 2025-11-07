@@ -12,7 +12,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-import psutil
 from loguru import logger
 
 from app.core.config import config
@@ -198,7 +197,7 @@ class BackupEngine:
         # Check available disk space
         dest_stat = shutil.disk_usage(self.destination.parent)
         if dest_stat.free < self.stats["total_size"]:
-            raise IOError(f"Insufficient disk space at destination")
+            raise IOError("Insufficient disk space at destination")
 
         # Scan directory
         files_to_backup = self.scan_directory(progress_callback)

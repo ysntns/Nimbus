@@ -4,7 +4,6 @@ AWS S3 Provider - Cloud storage integration for Amazon S3
 Implements backup to AWS S3 using boto3.
 """
 
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -20,7 +19,6 @@ from app.cloud.base import (
 
 try:
     import boto3
-    from botocore.exceptions import ClientError, NoCredentialsError
 
     AWS_S3_AVAILABLE = True
 except ImportError:

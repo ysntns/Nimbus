@@ -2,9 +2,6 @@
 Integration tests for encryption module.
 """
 
-import tempfile
-from pathlib import Path
-
 import pytest
 
 

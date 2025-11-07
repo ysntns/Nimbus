@@ -4,7 +4,6 @@ Configuration Manager for Nimbus
 Handles all configuration file operations, default settings, and user preferences.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 

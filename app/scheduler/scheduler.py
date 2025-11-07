@@ -6,14 +6,13 @@ Provides scheduled backup functionality with cron-like scheduling.
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime, time
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from loguru import logger
 
 try:
-    from apscheduler.job import Job
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
     from apscheduler.triggers.interval import IntervalTrigger
@@ -321,7 +320,7 @@ class BackupScheduler:
         try:
             hour, minute = map(int, time_str.split(":"))
             return hour, minute
-        except:
+        except (ValueError, AttributeError):
             return 0, 0
 
     def _execute_backup(self, schedule: BackupSchedule):

@@ -2,7 +2,6 @@
 Integration tests for full backup workflow.
 """
 
-import shutil
 import tempfile
 from pathlib import Path
 
@@ -81,7 +80,6 @@ def test_scheduler_basic():
     """Test scheduler basic functionality."""
     try:
         import tempfile
-        from datetime import datetime
 
         from app.scheduler.scheduler import BackupSchedule, BackupScheduler
 

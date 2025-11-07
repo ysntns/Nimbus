@@ -5,8 +5,8 @@ PyQt6-based GUI application for visual backup management.
 """
 
 try:
-    from app.gui.main import main
-    from app.gui.main_window import MainWindow
+    from app.gui.main import main  # noqa: F401
+    from app.gui.main_window import MainWindow  # noqa: F401
 
     __all__ = ["main", "MainWindow"]
 except ImportError:
