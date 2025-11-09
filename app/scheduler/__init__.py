@@ -8,6 +8,6 @@ try:
     from app.scheduler.scheduler import BackupSchedule, BackupScheduler  # noqa: F401
 
     __all__ = ["BackupScheduler", "BackupSchedule"]
-except ImportError:
-    # APScheduler not installed
+except Exception:
+    # APScheduler not installed or dependencies missing
     __all__ = []

@@ -8,6 +8,6 @@ try:
     from app.crypto.encryption import EncryptionManager, KeyManager  # noqa: F401
 
     __all__ = ["EncryptionManager", "KeyManager"]
-except ImportError:
-    # cryptography not installed
+except Exception:
+    # cryptography not installed or dependencies missing
     __all__ = []

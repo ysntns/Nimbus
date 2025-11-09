@@ -9,6 +9,6 @@ try:
     from app.gui.main_window import MainWindow  # noqa: F401
 
     __all__ = ["main", "MainWindow"]
-except ImportError:
-    # PyQt6 not installed
+except Exception:
+    # PyQt6 not installed or dependencies missing
     __all__ = []
