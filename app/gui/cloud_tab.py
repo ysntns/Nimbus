@@ -2,11 +2,12 @@
 Cloud Sync Tab - Google Drive and other cloud providers
 """
 
-import customtkinter as ctk
-from tkinter import filedialog
-import threading
 import os
 import sys
+import threading
+from tkinter import filedialog
+
+import customtkinter as ctk
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

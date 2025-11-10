@@ -2,9 +2,10 @@
 Settings Tab - Application settings
 """
 
+import os
+
 import customtkinter as ctk
 import yaml
-import os
 
 
 class SettingsTab:

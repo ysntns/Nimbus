@@ -3,19 +3,20 @@ Nimbus Main GUI Window - CustomTkinter Version
 Modern interface with CustomTkinter
 """
 
-import customtkinter as ctk
-import sys
 import os
+import sys
+
+import customtkinter as ctk
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.gui.backup_tab import BackupTab  # noqa: E402
+from app.gui.cloud_tab import CloudTab  # noqa: E402
+from app.gui.history_tab import HistoryTab  # noqa: E402
 from app.gui.restore_tab import RestoreTab  # noqa: E402
 from app.gui.schedule_tab import ScheduleTab  # noqa: E402
-from app.gui.history_tab import HistoryTab  # noqa: E402
 from app.gui.settings_tab import SettingsTab  # noqa: E402
-from app.gui.cloud_tab import CloudTab  # noqa: E402
 
 
 class NimbusGUI(ctk.CTk):
