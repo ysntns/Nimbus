@@ -10,13 +10,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from loguru import logger
 
-from app.cloud.base import (
-    CloudFile,
-    CloudProvider,
-    CloudProviderFactory,
-    DownloadResult,
-    UploadResult,
-)
+from app.cloud.base import CloudFile, CloudProvider, CloudProviderFactory, DownloadResult, UploadResult
 
 try:
     from google.auth.transport.requests import Request

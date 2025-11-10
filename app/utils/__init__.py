@@ -20,11 +20,7 @@ from app.utils.helpers import (
     truncate_string,
     validate_email,
 )
-from app.utils.notifications import (
-    NotificationConfig,
-    NotificationManager,
-    NotificationType,
-)
+from app.utils.notifications import NotificationConfig, NotificationManager, NotificationType
 
 __all__ = [
     # Helpers

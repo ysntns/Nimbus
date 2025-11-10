@@ -9,13 +9,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from loguru import logger
 
-from app.cloud.base import (
-    CloudFile,
-    CloudProvider,
-    CloudProviderFactory,
-    DownloadResult,
-    UploadResult,
-)
+from app.cloud.base import CloudFile, CloudProvider, CloudProviderFactory, DownloadResult, UploadResult
 
 try:
     import boto3

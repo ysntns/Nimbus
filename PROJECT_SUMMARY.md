@@ -4,9 +4,9 @@
 
 **Nimbus** is an enterprise-grade backup and cloud synchronization solution designed specifically for Linux systems. Built with Python, it provides both CLI and GUI interfaces for comprehensive data protection.
 
-**Author:** Yasin TANIŞ  
-**Company:** CerebrAI-VorTX  
-**Version:** 2.0.0  
+**Author:** Yasin TANIŞ
+**Company:** CerebrAI-VorTX
+**Version:** 2.0.0
 **Status:** ✅ Production Ready for Claude Code Development
 
 ---
@@ -314,13 +314,13 @@ Each provider should implement:
 class CloudProvider(ABC):
     @abstractmethod
     def authenticate(self) -> bool: pass
-    
+
     @abstractmethod
     def upload_file(self, local_path, remote_path): pass
-    
+
     @abstractmethod
     def download_file(self, remote_path, local_path): pass
-    
+
     @abstractmethod
     def list_files(self, path): pass
 ```
@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.init_ui()
-    
+
     def init_ui(self):
         # Setup UI components
 ```

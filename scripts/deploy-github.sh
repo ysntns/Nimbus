@@ -2,7 +2,7 @@
 
 ##############################################################################
 # Nimbus GitHub Deploy Script
-# 
+#
 # This script initializes git, creates a private repo, and pushes to GitHub
 #
 # Author: Yasin TANIŞ
@@ -29,7 +29,7 @@ if ! command -v gh &> /dev/null; then
     echo -e "${YELLOW}⚠️  GitHub CLI (gh) is not installed.${NC}"
     echo -e "${YELLOW}   Install with: sudo apt install gh${NC}"
     echo -e "${YELLOW}   Or visit: https://cli.github.com/${NC}\n"
-    
+
     read -p "Do you want to continue without creating a new repo? (y/n): " continue_choice
     if [[ $continue_choice != "y" ]]; then
         exit 0
@@ -41,7 +41,7 @@ else
         echo "Please login with: gh auth login"
         exit 1
     fi
-    
+
     CREATE_REPO=true
 fi
 
@@ -76,7 +76,7 @@ git branch -M main
 if [[ $CREATE_REPO == true ]]; then
     echo -e "\n${GREEN}🌟 Creating private GitHub repository...${NC}"
     gh repo create nimbus --private --source=. --description="Enterprise Backup & Cloud Sync Solution for Linux" --push
-    
+
     echo -e "\n${GREEN}✅ Repository created and pushed successfully!${NC}"
     echo -e "${GREEN}🔗 Repository URL: https://github.com/ysntns/nimbus${NC}\n"
 else

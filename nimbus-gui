@@ -4,14 +4,15 @@ Nimbus GUI Launcher
 Launch the CustomTkinter-based GUI application
 """
 
-import sys
 import os
+import sys
 
 # Add app directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'app'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "app"))
 
 try:
     from app.gui.main_window_ctk import main
+
     main()
 except ImportError as e:
     print(f"Error: {e}")
@@ -21,5 +22,6 @@ except ImportError as e:
 except Exception as e:
     print(f"Error launching Nimbus GUI: {e}")
     import traceback
+
     traceback.print_exc()
     sys.exit(1)
