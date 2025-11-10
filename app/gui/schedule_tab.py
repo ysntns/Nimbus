@@ -253,9 +253,9 @@ class ScheduleTab:
         for widget in self.schedules_frame.winfo_children():
             widget.destroy()
 
-        jobs = self.scheduler.list_jobs()
+        schedules = self.scheduler.list_schedules()
 
-        if not jobs:
+        if not schedules:
             no_schedules = ctk.CTkLabel(
                 self.schedules_frame, text="No active schedules", font=ctk.CTkFont(size=13), text_color="gray"
             )
@@ -263,43 +263,50 @@ class ScheduleTab:
             return
 
         # Display schedules
-        for idx, job in enumerate(jobs):
-            self._create_schedule_card(job, idx)
+        for idx, schedule in enumerate(schedules):
+            self._create_schedule_card(schedule, idx)
 
-    def _create_schedule_card(self, job, idx):
+    def _create_schedule_card(self, schedule, idx):
         """Create schedule card"""
         card = ctk.CTkFrame(self.schedules_frame)
         card.grid(row=idx, column=0, padx=5, pady=5, sticky="ew")
         card.grid_columnconfigure(1, weight=1)
 
         # Status indicator
-        status_frame = ctk.CTkFrame(card, width=5, fg_color="green")
+        status_color = "green" if schedule.enabled else "gray"
+        status_frame = ctk.CTkFrame(card, width=5, fg_color=status_color)
         status_frame.grid(row=0, column=0, rowspan=3, sticky="ns")
 
-        # Job info
-        name_label = ctk.CTkLabel(card, text=job.get("name", job["id"]), font=ctk.CTkFont(size=13, weight="bold"))
+        # Schedule info
+        name_label = ctk.CTkLabel(card, text=schedule.name, font=ctk.CTkFont(size=13, weight="bold"))
         name_label.grid(row=0, column=1, padx=15, pady=(15, 5), sticky="w")
 
-        next_run = job.get("next_run_time", "N/A")
+        next_run = schedule.next_run if schedule.next_run else "N/A"
         if next_run != "N/A":
             next_run = str(next_run).split(".")[0]  # Remove microseconds
 
         schedule_label = ctk.CTkLabel(card, text=f"Next run: {next_run}", font=ctk.CTkFont(size=11), text_color="gray")
         schedule_label.grid(row=1, column=1, padx=15, pady=2, sticky="w")
 
-        trigger_label = ctk.CTkLabel(
-            card, text=f"Trigger: {job.get('trigger', 'N/A')}", font=ctk.CTkFont(size=11), text_color="gray"
+        freq_label = ctk.CTkLabel(
+            card, text=f"Frequency: {schedule.frequency.title()}", font=ctk.CTkFont(size=11), text_color="gray"
         )
-        trigger_label.grid(row=2, column=1, padx=15, pady=(2, 15), sticky="w")
+        freq_label.grid(row=2, column=1, padx=15, pady=(2, 15), sticky="w")
 
         # Control buttons
         button_frame = ctk.CTkFrame(card)
         button_frame.grid(row=0, column=2, rowspan=3, padx=15, pady=15)
 
-        pause_btn = ctk.CTkButton(
-            button_frame, text="Pause", width=80, height=30, command=lambda j=job: self._pause_schedule(j["id"])
+        # Enable/Disable button
+        toggle_text = "Disable" if schedule.enabled else "Enable"
+        toggle_btn = ctk.CTkButton(
+            button_frame,
+            text=toggle_text,
+            width=80,
+            height=30,
+            command=lambda s=schedule: self._toggle_schedule(s.id, s.enabled),
         )
-        pause_btn.pack(side="left", padx=2)
+        toggle_btn.pack(side="left", padx=2)
 
         delete_btn = ctk.CTkButton(
             button_frame,
@@ -308,30 +315,34 @@ class ScheduleTab:
             height=30,
             fg_color="red",
             hover_color="darkred",
-            command=lambda j=job: self._delete_schedule(j["id"]),
+            command=lambda s=schedule: self._delete_schedule(s.id),
         )
         delete_btn.pack(side="left", padx=2)
 
-    def _pause_schedule(self, job_id: str):
-        """Pause a schedule"""
+    def _toggle_schedule(self, schedule_id: str, currently_enabled: bool):
+        """Toggle schedule enabled/disabled"""
         if not SCHEDULER_AVAILABLE:
             return
 
         try:
-            self.scheduler.pause_job(job_id)
-            self.main_window.update_status(f"Schedule paused: {job_id}")
+            if currently_enabled:
+                self.scheduler.disable_schedule(schedule_id)
+                self.main_window.update_status(f"Schedule disabled: {schedule_id}")
+            else:
+                self.scheduler.enable_schedule(schedule_id)
+                self.main_window.update_status(f"Schedule enabled: {schedule_id}")
             self._load_schedules()
         except Exception as e:
-            self.main_window.show_error("Error", f"Failed to pause schedule: {str(e)}")
+            self.main_window.show_error("Error", f"Failed to toggle schedule: {str(e)}")
 
-    def _delete_schedule(self, job_id: str):
+    def _delete_schedule(self, schedule_id: str):
         """Delete a schedule"""
         if not SCHEDULER_AVAILABLE:
             return
 
         try:
-            self.scheduler.remove_job(job_id)
-            self.main_window.update_status(f"Schedule deleted: {job_id}")
+            self.scheduler.remove_schedule(schedule_id)
+            self.main_window.update_status(f"Schedule deleted: {schedule_id}")
             self._load_schedules()
         except Exception as e:
             self.main_window.show_error("Error", f"Failed to delete schedule: {str(e)}")
