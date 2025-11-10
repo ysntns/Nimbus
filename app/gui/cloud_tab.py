@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from app.cloud.google_drive import GoogleDriveProvider
+
     GDRIVE_AVAILABLE = True
 except Exception:
     GDRIVE_AVAILABLE = False
@@ -34,11 +35,7 @@ class CloudTab:
         self.parent.grid_columnconfigure(0, weight=1)
 
         # Cloud Provider Selection
-        provider_label = ctk.CTkLabel(
-            self.parent,
-            text="Cloud Provider",
-            font=ctk.CTkFont(size=14, weight="bold")
-        )
+        provider_label = ctk.CTkLabel(self.parent, text="Cloud Provider", font=ctk.CTkFont(size=14, weight="bold"))
         provider_label.grid(row=0, column=0, padx=20, pady=(20, 5), sticky="w")
 
         provider_frame = ctk.CTkFrame(self.parent)
@@ -54,16 +51,12 @@ class CloudTab:
                 variable=self.provider_var,
                 value=provider,
                 font=ctk.CTkFont(size=13),
-                command=self._on_provider_change
+                command=self._on_provider_change,
             )
             radio.grid(row=idx // 3, column=idx % 3, padx=15, pady=10, sticky="w")
 
         # Authentication Section
-        auth_label = ctk.CTkLabel(
-            self.parent,
-            text="Authentication",
-            font=ctk.CTkFont(size=14, weight="bold")
-        )
+        auth_label = ctk.CTkLabel(self.parent, text="Authentication", font=ctk.CTkFont(size=14, weight="bold"))
         auth_label.grid(row=2, column=0, padx=20, pady=(0, 5), sticky="w")
 
         auth_frame = ctk.CTkFrame(self.parent)
@@ -71,74 +64,41 @@ class CloudTab:
         auth_frame.grid_columnconfigure(1, weight=1)
 
         self.auth_status_label = ctk.CTkLabel(
-            auth_frame,
-            text="Not authenticated",
-            font=ctk.CTkFont(size=13),
-            text_color="gray"
+            auth_frame, text="Not authenticated", font=ctk.CTkFont(size=13), text_color="gray"
         )
         self.auth_status_label.grid(row=0, column=0, padx=15, pady=15, sticky="w")
 
-        self.auth_btn = ctk.CTkButton(
-            auth_frame,
-            text="Connect to Google Drive",
-            height=35,
-            command=self._authenticate
-        )
+        self.auth_btn = ctk.CTkButton(auth_frame, text="Connect to Google Drive", height=35, command=self._authenticate)
         self.auth_btn.grid(row=0, column=1, padx=15, pady=15, sticky="e")
 
         # Storage Info
-        storage_label = ctk.CTkLabel(
-            self.parent,
-            text="Storage Information",
-            font=ctk.CTkFont(size=14, weight="bold")
-        )
+        storage_label = ctk.CTkLabel(self.parent, text="Storage Information", font=ctk.CTkFont(size=14, weight="bold"))
         storage_label.grid(row=4, column=0, padx=20, pady=(0, 5), sticky="w")
 
         self.storage_frame = ctk.CTkFrame(self.parent)
         self.storage_frame.grid(row=5, column=0, padx=20, pady=(0, 20), sticky="ew")
 
         self.storage_info_label = ctk.CTkLabel(
-            self.storage_frame,
-            text="Connect to view storage information",
-            font=ctk.CTkFont(size=12),
-            text_color="gray"
+            self.storage_frame, text="Connect to view storage information", font=ctk.CTkFont(size=12), text_color="gray"
         )
         self.storage_info_label.grid(row=0, column=0, padx=15, pady=20)
 
         # Upload Section
-        upload_label = ctk.CTkLabel(
-            self.parent,
-            text="Upload to Cloud",
-            font=ctk.CTkFont(size=14, weight="bold")
-        )
+        upload_label = ctk.CTkLabel(self.parent, text="Upload to Cloud", font=ctk.CTkFont(size=14, weight="bold"))
         upload_label.grid(row=6, column=0, padx=20, pady=(0, 5), sticky="w")
 
         upload_frame = ctk.CTkFrame(self.parent)
         upload_frame.grid(row=7, column=0, padx=20, pady=(0, 20), sticky="ew")
         upload_frame.grid_columnconfigure(0, weight=1)
 
-        self.upload_entry = ctk.CTkEntry(
-            upload_frame,
-            placeholder_text="Select directory to upload...",
-            height=40
-        )
+        self.upload_entry = ctk.CTkEntry(upload_frame, placeholder_text="Select directory to upload...", height=40)
         self.upload_entry.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
-        upload_browse_btn = ctk.CTkButton(
-            upload_frame,
-            text="Browse",
-            width=100,
-            height=40,
-            command=self._browse_upload
-        )
+        upload_browse_btn = ctk.CTkButton(upload_frame, text="Browse", width=100, height=40, command=self._browse_upload)
         upload_browse_btn.grid(row=0, column=1, padx=10, pady=10)
 
         # Progress Section
-        progress_label = ctk.CTkLabel(
-            self.parent,
-            text="Progress",
-            font=ctk.CTkFont(size=14, weight="bold")
-        )
+        progress_label = ctk.CTkLabel(self.parent, text="Progress", font=ctk.CTkFont(size=14, weight="bold"))
         progress_label.grid(row=8, column=0, padx=20, pady=(0, 5), sticky="w")
 
         progress_frame = ctk.CTkFrame(self.parent, height=120)
@@ -146,22 +106,14 @@ class CloudTab:
         progress_frame.grid_propagate(False)
         progress_frame.grid_columnconfigure(0, weight=1)
 
-        self.cloud_status_label = ctk.CTkLabel(
-            progress_frame,
-            text="Ready",
-            font=ctk.CTkFont(size=13)
-        )
+        self.cloud_status_label = ctk.CTkLabel(progress_frame, text="Ready", font=ctk.CTkFont(size=13))
         self.cloud_status_label.grid(row=0, column=0, padx=15, pady=(15, 10), sticky="w")
 
         self.cloud_progress_bar = ctk.CTkProgressBar(progress_frame)
         self.cloud_progress_bar.grid(row=1, column=0, padx=15, pady=10, sticky="ew")
         self.cloud_progress_bar.set(0)
 
-        self.cloud_progress_text = ctk.CTkTextbox(
-            progress_frame,
-            height=40,
-            font=ctk.CTkFont(size=11, family="Courier")
-        )
+        self.cloud_progress_text = ctk.CTkTextbox(progress_frame, height=40, font=ctk.CTkFont(size=11, family="Courier"))
         self.cloud_progress_text.grid(row=2, column=0, padx=15, pady=(10, 15), sticky="ew")
 
         # Upload Button
@@ -174,7 +126,7 @@ class CloudTab:
             height=40,
             font=ctk.CTkFont(size=14, weight="bold"),
             state="disabled",
-            command=self._start_upload
+            command=self._start_upload,
         )
         self.upload_btn.pack(fill="x", padx=0, pady=0)
 
@@ -193,10 +145,7 @@ class CloudTab:
         if provider == "Google Drive":
             self._authenticate_google_drive()
         else:
-            self.main_window.show_info(
-                "Coming Soon",
-                f"{provider} integration will be available in the next update!"
-            )
+            self.main_window.show_info("Coming Soon", f"{provider} integration will be available in the next update!")
 
     def _authenticate_google_drive(self):
         """Authenticate with Google Drive"""
@@ -204,7 +153,7 @@ class CloudTab:
             self.main_window.show_error(
                 "Google Drive Not Available",
                 "Google Drive dependencies are not installed.\n"
-                "Install with: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib"
+                "Install with: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib",
             )
             return
 
@@ -223,41 +172,28 @@ class CloudTab:
             # Get storage quota
             quota = self.gdrive_client.get_storage_quota()
 
-            self.auth_status_label.configure(
-                text="✓ Connected to Google Drive",
-                text_color="green"
-            )
+            self.auth_status_label.configure(text="✓ Connected to Google Drive", text_color="green")
 
             # Update storage info
-            total_gb = quota['limit'] / (1024**3) if quota['limit'] > 0 else 0
-            used_gb = quota['usage'] / (1024**3)
-            percent = (quota['usage'] / quota['limit']) * 100 if quota['limit'] > 0 else 0
+            total_gb = quota["limit"] / (1024**3) if quota["limit"] > 0 else 0
+            used_gb = quota["usage"] / (1024**3)
+            percent = (quota["usage"] / quota["limit"]) * 100 if quota["limit"] > 0 else 0
 
             storage_text = f"Storage: {used_gb:.2f} GB / {total_gb:.2f} GB ({percent:.1f}% used)"
 
-            self.storage_info_label.configure(
-                text=storage_text,
-                text_color="white"
-            )
+            self.storage_info_label.configure(text=storage_text, text_color="white")
 
             self.upload_btn.configure(state="normal")
             self.main_window.update_status("Connected to Google Drive")
 
-        except FileNotFoundError as e:
-            self.auth_status_label.configure(
-                text="✗ Credentials file not found",
-                text_color="red"
-            )
+        except FileNotFoundError:
+            self.auth_status_label.configure(text="✗ Credentials file not found", text_color="red")
             self.main_window.show_error(
                 "Authentication Error",
-                "Please download OAuth 2.0 credentials from Google Cloud Console\n"
-                "and save as ~/.nimbus/credentials.json"
+                "Please download OAuth 2.0 credentials from Google Cloud Console\n" "and save as ~/.nimbus/credentials.json",
             )
         except Exception as e:
-            self.auth_status_label.configure(
-                text=f"✗ Authentication failed: {str(e)}",
-                text_color="red"
-            )
+            self.auth_status_label.configure(text=f"✗ Authentication failed: {str(e)}", text_color="red")
 
     def _browse_upload(self):
         """Browse for directory to upload"""
@@ -278,17 +214,11 @@ class CloudTab:
     def _start_upload(self):
         """Start upload to cloud"""
         if not self.selected_directory:
-            self.main_window.show_error(
-                "Error",
-                "Please select a directory to upload"
-            )
+            self.main_window.show_error("Error", "Please select a directory to upload")
             return
 
         if not self.gdrive_client:
-            self.main_window.show_error(
-                "Error",
-                "Please authenticate first"
-            )
+            self.main_window.show_error("Error", "Please authenticate first")
             return
 
         # Disable button
@@ -309,14 +239,10 @@ class CloudTab:
             self._update_cloud_progress(0, "Starting upload to Google Drive...")
 
             result = self.gdrive_client.upload_directory(
-                self.selected_directory,
-                progress_callback=self._update_cloud_progress
+                self.selected_directory, progress_callback=self._update_cloud_progress
             )
 
-            self._update_cloud_progress(
-                100,
-                f"✓ Upload completed! {result.get('files_uploaded', 0)} files uploaded"
-            )
+            self._update_cloud_progress(100, f"✓ Upload completed! {result.get('files_uploaded', 0)} files uploaded")
             self.main_window.update_status("Upload completed")
 
         except Exception as e:
