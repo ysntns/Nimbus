@@ -241,11 +241,13 @@ def gui():
     console.print("\n[cyan]🖥️ Launching Nimbus GUI...[/cyan]\n")
 
     try:
-        from app.gui.main import main as gui_main
+        # Düzeltme: PyQt6 yerine CustomTkinter GUI'sini başlat
+        from app.gui.main_window_ctk import main as gui_main
 
         gui_main()
     except ImportError:
-        console.print("[red]❌ GUI dependencies not installed. Install with: pip install nimbus-backup[gui][/red]\n")
+        # Düzeltme: Hata mesajını CustomTkinter'a göre güncelle
+        console.print("[red]❌ GUI dependencies not installed. Install with: pip install customtkinter pillow darkdetect[/red]\n")
         raise click.Abort()
 
 
