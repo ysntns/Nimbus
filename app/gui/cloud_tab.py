@@ -5,6 +5,7 @@ Cloud Sync Tab - Google Drive and other cloud providers
 import os
 import sys
 import threading
+from pathlib import Path
 from tkinter import filedialog
 
 import customtkinter as ctk
@@ -168,17 +169,34 @@ class CloudTab:
     def _run_authentication(self):
         """Run authentication in background"""
         try:
-            self.gdrive_client = GoogleDriveProvider()
+            # Define paths for credentials and token
+            base_path = Path.home() / ".nimbus"
+            creds_file_path = base_path / "credentials.json"
+            token_file_path = base_path / "token.json"
+
+            # Check if credentials file exists
+            if not creds_file_path.exists():
+                raise FileNotFoundError(f"Credentials file not found at {creds_file_path}")
+
+            # Create credentials dictionary for GoogleDriveProvider
+            credentials_dict = {"credentials_file": str(creds_file_path), "token_file": str(token_file_path)}
+
+            # Initialize GoogleDriveProvider with credentials
+            self.gdrive_client = GoogleDriveProvider(credentials=credentials_dict)
+
+            # Authenticate with Google Drive
+            if not self.gdrive_client.authenticate():
+                raise Exception("Google Drive authentication failed")
 
             # Get storage quota
-            quota = self.gdrive_client.get_storage_quota()
+            quota = self.gdrive_client.get_quota_info()
 
             self.auth_status_label.configure(text="✓ Connected to Google Drive", text_color="green")
 
             # Update storage info
-            total_gb = quota["limit"] / (1024**3) if quota["limit"] > 0 else 0
-            used_gb = quota["usage"] / (1024**3)
-            percent = (quota["usage"] / quota["limit"]) * 100 if quota["limit"] > 0 else 0
+            total_gb = quota.get("total", 0) / (1024**3)
+            used_gb = quota.get("used", 0) / (1024**3)
+            percent = (used_gb / total_gb) * 100 if total_gb > 0 else 0
 
             storage_text = f"Storage: {used_gb:.2f} GB / {total_gb:.2f} GB ({percent:.1f}% used)"
 
@@ -187,11 +205,13 @@ class CloudTab:
             self.upload_btn.configure(state="normal")
             self.main_window.update_status("Connected to Google Drive")
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             self.auth_status_label.configure(text="✗ Credentials file not found", text_color="red")
             self.main_window.show_error(
                 "Authentication Error",
-                "Please download OAuth 2.0 credentials from Google Cloud Console\n" "and save as ~/.nimbus/credentials.json",
+                f"Please download OAuth 2.0 credentials from Google Cloud Console\n"
+                f"and save as {Path.home() / '.nimbus' / 'credentials.json'}\n\n"
+                f"Error: {str(e)}",
             )
         except Exception as e:
             self.auth_status_label.configure(text=f"✗ Authentication failed: {str(e)}", text_color="red")
