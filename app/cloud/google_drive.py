@@ -337,6 +337,70 @@ class GoogleDriveProvider(CloudProvider):
             logger.error(f"Failed to get quota info from Google Drive: {e}")
             return {"total": 0, "used": 0, "available": 0}
 
+    def upload_directory(self, directory_path: str, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
+        """Upload an entire directory to Google Drive.
+
+        Args:
+            directory_path: Path to local directory
+            progress_callback: Optional callback for progress updates
+
+        Returns:
+            Dictionary with upload statistics
+        """
+        if not self.authenticated:
+            return {"success": False, "error": "Not authenticated", "files_uploaded": 0}
+
+        try:
+            directory = Path(directory_path)
+            if not directory.exists() or not directory.is_dir():
+                return {"success": False, "error": "Invalid directory path", "files_uploaded": 0}
+
+            # Collect all files
+            all_files = list(directory.rglob("*"))
+            all_files = [f for f in all_files if f.is_file()]
+
+            if not all_files:
+                return {"success": True, "files_uploaded": 0, "total_size": 0}
+
+            total_files = len(all_files)
+            uploaded_files = 0
+            total_size = 0
+            errors = []
+
+            for idx, file_path in enumerate(all_files):
+                try:
+                    # Upload file
+                    result = self.upload_file(file_path, str(file_path.relative_to(directory)))
+
+                    if result.success:
+                        uploaded_files += 1
+                        total_size += result.size
+                    else:
+                        errors.append(f"{file_path.name}: {result.error}")
+
+                    # Update progress
+                    if progress_callback:
+                        progress = ((idx + 1) / total_files) * 100
+                        progress_callback(progress, f"Uploaded {uploaded_files}/{total_files}: {file_path.name}")
+
+                except Exception as e:
+                    errors.append(f"{file_path.name}: {str(e)}")
+                    logger.error(f"Failed to upload {file_path.name}: {e}")
+
+            logger.info(f"Directory upload completed: {uploaded_files}/{total_files} files, {total_size} bytes")
+
+            return {
+                "success": True,
+                "files_uploaded": uploaded_files,
+                "total_files": total_files,
+                "total_size": total_size,
+                "errors": errors,
+            }
+
+        except Exception as e:
+            logger.error(f"Directory upload failed: {e}")
+            return {"success": False, "error": str(e), "files_uploaded": 0}
+
 
 # Register provider
 if GOOGLE_DRIVE_AVAILABLE:
