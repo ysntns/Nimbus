@@ -19,7 +19,7 @@ if requirements_file.exists():
 
 setup(
     name="nimbus-backup",
-    version="2.0.0",
+    version="3.0.0",  # <-- Düzeltme: 2.0.0'dan 3.0.0'a güncellendi
     author="Yasin TANIŞ",
     author_email="ysn.tnss@gmail.com",
     description="Enterprise-grade backup and cloud synchronization solution",
