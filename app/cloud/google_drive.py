@@ -337,7 +337,7 @@ class GoogleDriveProvider(CloudProvider):
             logger.error(f"Failed to get quota info from Google Drive: {e}")
             return {"total": 0, "used": 0, "available": 0}
 
-    def upload_directory(self, directory_path: str, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
+    def upload_directory(self, directory_path: str, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:  # noqa: C901
         """Upload an entire directory to Google Drive.
 
         Args:
