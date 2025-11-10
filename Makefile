@@ -10,13 +10,13 @@ help:
 	@echo "  make format     - Format code"
 	@echo "  make clean      - Clean build artifacts"
 	@echo "  make run        - Run CLI"
-	@echo "  make gui        - Run GUI"
+	@echo "  make gui       
+ - Run GUI"
 	@echo "  make docs       - Generate documentation"
 
 install:
 	pip install -r requirements.txt
 	pip install -e .
-
 test:
 	pytest tests/ -v
 
