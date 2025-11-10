@@ -1,0 +1,124 @@
+name: nimbus-backup
+base: core22
+version: '3.0'
+summary: Enterprise-grade backup and cloud synchronization solution
+description: |
+  Nimbus is a powerful, enterprise-grade backup solution with cloud synchronization
+  capabilities. It provides incremental backups, encryption, scheduling, and supports
+  multiple cloud providers including Google Drive, Dropbox, and AWS S3.
+
+  Features:
+  - Modern CustomTkinter GUI interface
+  - Incremental and differential backups
+  - Cloud synchronization (Google Drive, Dropbox, AWS S3)
+  - Automated scheduling with APScheduler
+  - Backup encryption support
+  - Real-time progress tracking
+  - Backup history and restore capabilities
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  nimbus-backup:
+    command: bin/nimbus
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+
+  nimbus-gui:
+    command: bin/nimbus-gui-wrapper
+    extensions: [gnome]
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+    desktop: usr/share/applications/nimbus-backup.desktop
+    environment:
+      PYTHONPATH: $SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages
+      TCL_LIBRARY: $SNAP/usr/share/tcltk/tcl8.6
+      TK_LIBRARY: $SNAP/usr/share/tcltk/tk8.6
+      TKPATH: $SNAP/usr/lib/x86_64-linux-gnu/tk8.6
+
+parts:
+  nimbus:
+    plugin: python
+    source: .
+    python-packages:
+      - click>=8.1.0
+      - rich>=13.0.0
+      - loguru>=0.7.0
+      - pyyaml>=6.0
+      - psutil>=5.9.0
+      - requests>=2.31.0
+      - customtkinter>=5.2.0
+      - pillow>=10.0.0
+      - darkdetect>=0.8.0
+      - google-api-python-client>=2.100.0
+      - google-auth-httplib2>=0.1.1
+      - google-auth-oauthlib>=1.1.0
+      - dropbox>=11.36.0
+      - boto3>=1.28.0
+      - cryptography>=41.0.0
+      - apscheduler>=3.10.0
+    stage-packages:
+      - python3-tk
+      - tk8.6
+      - tcl8.6
+      - libtk8.6
+      - libtcl8.6
+      - libx11-6
+      - libxext6
+      - libxft2
+      - libxrender1
+      - libfontconfig1
+      - libfreetype6
+      - libpng16-16
+      - libjpeg8
+    build-packages:
+      - python3-dev
+      - python3-pip
+      - python3-setuptools
+      - tk8.6-dev
+      - tcl8.6-dev
+    override-build: |
+      craftctl default
+      # Install the package
+      pip install --no-deps --prefix=$CRAFT_PART_INSTALL .
+      # Create wrapper script for GUI
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      cat > $CRAFT_PART_INSTALL/bin/nimbus-gui-wrapper << 'EOF'
+      #!/bin/bash
+      export PYTHONPATH=$SNAP/lib/python3.10/site-packages:$SNAP/usr/lib/python3/dist-packages
+      export TCL_LIBRARY=$SNAP/usr/share/tcltk/tcl8.6
+      export TK_LIBRARY=$SNAP/usr/share/tcltk/tk8.6
+      cd $SNAP
+      exec $SNAP/bin/python3 $SNAP/bin/nimbus-gui "$@"
+      EOF
+      chmod +x $CRAFT_PART_INSTALL/bin/nimbus-gui-wrapper
+      # Copy GUI launcher script
+      cp nimbus-gui $CRAFT_PART_INSTALL/bin/
+      chmod +x $CRAFT_PART_INSTALL/bin/nimbus-gui
+
+  desktop-file:
+    plugin: dump
+    source: snap/gui/
+    organize:
+      nimbus-backup.desktop: usr/share/applications/nimbus-backup.desktop
+      nimbus-icon.png: usr/share/icons/hicolor/256x256/apps/nimbus-backup.png
+
+layout:
+  /usr/share/tcltk:
+    bind: $SNAP/usr/share/tcltk

@@ -176,3 +176,11 @@ test_backups/
 *.pyd
 .Python
 pip-log.txt
+
+# Snap build artifacts
+*.snap
+parts/
+prime/
+stage/
+snap/.snapcraft/
+__pycache__/
