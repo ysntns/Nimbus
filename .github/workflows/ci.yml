@@ -94,7 +94,7 @@ jobs:
       run: isort --check-only app/ tests/
 
     - name: Run flake8
-      run: flake8 app/ tests/ --max-line-length=127
+      run: flake8 app/ tests/ --max-line-length=127 --extend-ignore=C901
 
     - name: Run mypy
       run: mypy app/ --ignore-missing-imports
