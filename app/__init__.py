@@ -5,12 +5,12 @@ A professional-grade backup tool for Linux systems with multi-cloud support,
 encryption, incremental backups, and real-time monitoring.
 """
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"  # <-- Düzeltme: 2.0.0'dan 3.0.0'a güncellendi
 __author__ = "Yasin TANIŞ"
 __email__ = "ysn.tnss@gmail.com"
 __license__ = "MIT"
 __copyright__ = "Copyright 2025 Yasin TANIŞ"
-__url__ = "https://github.com/ysntns/nimbus"
+__url__ = "https://cerebrai-vortx.com/"
 __description__ = "Enterprise-grade backup and cloud synchronization solution"
 
 # Package metadata
