@@ -12,6 +12,9 @@ import customtkinter as ctk
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Merkezi config'i import et
+from app.core.config import config
+
 try:
     from app.cloud.google_drive import GoogleDriveProvider
 
@@ -169,8 +172,8 @@ class CloudTab:
     def _run_authentication(self):
         """Run authentication in background"""
         try:
-            # Define paths for credentials and token
-            base_path = Path.home() / ".nimbus"
+            # Düzeltme: Merkezi config dizinini kullan
+            base_path = config.DEFAULT_CONFIG_DIR
             creds_file_path = base_path / "credentials.json"
             token_file_path = base_path / "token.json"
 
@@ -209,8 +212,9 @@ class CloudTab:
             self.auth_status_label.configure(text="✗ Credentials file not found", text_color="red")
             self.main_window.show_error(
                 "Authentication Error",
+                # Düzeltme: Hata mesajında doğru yolu göster
                 f"Please download OAuth 2.0 credentials from Google Cloud Console\n"
-                f"and save as {Path.home() / '.nimbus' / 'credentials.json'}\n\n"
+                f"and save as {config.DEFAULT_CONFIG_DIR / 'credentials.json'}\n\n"
                 f"Error: {str(e)}",
             )
         except Exception as e:
