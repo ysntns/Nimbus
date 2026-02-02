@@ -62,9 +62,14 @@ setup(
         "gui": [
             "PyQt6>=6.5.0",
             "PyQt6-WebEngine>=6.5.0",
+            "customtkinter>=5.2.0",
+            "pillow>=10.0.0",
+            "darkdetect>=0.8.0",
         ],
         "cloud": [
             "google-api-python-client>=2.100.0",
+            "google-auth-oauthlib>=1.1.0",
+            "google-auth-httplib2>=0.1.1",
             "dropbox>=11.36.0",
             "boto3>=1.28.0",
         ],
@@ -86,7 +91,12 @@ setup(
         "all": [
             "PyQt6>=6.5.0",
             "PyQt6-WebEngine>=6.5.0",
+            "customtkinter>=5.2.0",
+            "pillow>=10.0.0",
+            "darkdetect>=0.8.0",
             "google-api-python-client>=2.100.0",
+            "google-auth-oauthlib>=1.1.0",
+            "google-auth-httplib2>=0.1.1",
             "dropbox>=11.36.0",
             "boto3>=1.28.0",
             "cryptography>=41.0.0",
