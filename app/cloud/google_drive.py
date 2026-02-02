@@ -6,7 +6,7 @@ Implements backup to Google Drive using Google Drive API v3.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from loguru import logger
 
@@ -44,6 +44,113 @@ class GoogleDriveProvider(CloudProvider):
         super().__init__(credentials, config)
         self.service = None
         self.folder_id = config.get("folder_id") if config else None
+        # Cache for folder IDs to avoid redundant API calls
+        # Key: (parent_id, folder_name), Value: folder_id
+        self.folder_cache: Dict[Tuple[Optional[str], str], str] = {}
+
+    def _find_folder(self, name: str, parent_id: Optional[str]) -> Optional[str]:
+        """Find a folder by name within a parent folder.
+
+        Args:
+            name: Folder name
+            parent_id: Parent folder ID
+
+        Returns:
+            Folder ID if found, else None
+        """
+        # Check cache first
+        cache_key = (parent_id, name)
+        if cache_key in self.folder_cache:
+            return self.folder_cache[cache_key]
+
+        try:
+            # Escape single quotes in name to prevent query errors/injection
+            safe_name = name.replace("'", "\\'")
+            query = f"name = '{safe_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+            if parent_id:
+                query += f" and '{parent_id}' in parents"
+            else:
+                query += " and 'root' in parents"
+
+            results = (
+                self.service.files()
+                .list(q=query, spaces="drive", fields="files(id, name)", pageSize=1)
+                .execute()
+            )
+            files = results.get("files", [])
+
+            if files:
+                folder_id = files[0]["id"]
+                self.folder_cache[cache_key] = folder_id
+                return folder_id
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Failed to find folder '{name}': {e}")
+            return None
+
+    def _create_folder_in_parent(self, name: str, parent_id: Optional[str]) -> Optional[str]:
+        """Create a folder within a parent folder.
+
+        Args:
+            name: Folder name
+            parent_id: Parent folder ID
+
+        Returns:
+            New folder ID if successful, else None
+        """
+        try:
+            file_metadata = {
+                "name": name,
+                "mimeType": "application/vnd.google-apps.folder",
+            }
+            if parent_id:
+                file_metadata["parents"] = [parent_id]
+
+            file = self.service.files().create(body=file_metadata, fields="id").execute()
+            folder_id = file.get("id")
+
+            if folder_id:
+                self.folder_cache[(parent_id, name)] = folder_id
+                logger.debug(f"Created folder '{name}' (ID: {folder_id})")
+                return folder_id
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Failed to create folder '{name}': {e}")
+            return None
+
+    def _get_or_create_folder(self, path: str) -> Optional[str]:
+        """Get ID of a folder path, creating intermediate folders if needed.
+
+        Args:
+            path: Relative path (e.g., 'subdir/nested')
+
+        Returns:
+            Folder ID of the final directory
+        """
+        if not path or path == ".":
+            return self.folder_id
+
+        parts = Path(path).parts
+        current_parent_id = self.folder_id
+
+        for part in parts:
+            # Check if folder exists
+            folder_id = self._find_folder(part, current_parent_id)
+
+            if not folder_id:
+                # Create if not exists
+                folder_id = self._create_folder_in_parent(part, current_parent_id)
+                if not folder_id:
+                    logger.error(f"Could not create directory structure for '{path}'")
+                    return None
+
+            current_parent_id = folder_id
+
+        return current_parent_id
 
     def authenticate(self) -> bool:
         """Authenticate with Google Drive.
@@ -103,10 +210,22 @@ class GoogleDriveProvider(CloudProvider):
             return UploadResult(success=False, error="Not authenticated")
 
         try:
+            # Determine parent folder
+            parent_id = self.folder_id
+            remote_dir = str(Path(remote_path).parent)
+
+            if remote_dir and remote_dir != ".":
+                # Create directory structure if needed
+                found_parent_id = self._get_or_create_folder(remote_dir)
+                if found_parent_id:
+                    parent_id = found_parent_id
+                else:
+                    logger.warning(f"Failed to create directory structure for {remote_dir}, uploading to default folder")
+
             # File metadata
             file_metadata = {
                 "name": local_path.name,
-                "parents": [self.folder_id] if self.folder_id else [],
+                "parents": [parent_id] if parent_id else [],
             }
 
             # Create media upload
